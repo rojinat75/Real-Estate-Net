@@ -22,8 +22,8 @@ from django.conf.urls.static import static
 
 # Custom admin site with full access for superusers
 class SecureAdminSite(admin.AdminSite):
-    site_header = "🏠 Real Estate Nepal Administration"
-    site_title = "Real Estate Nepal Admin Portal"
+    site_header = "🏠 Real Estate Net Administration"
+    site_title = "Real Estate Net Admin Portal"
     index_title = "Welcome to Real Estate Admin"
     index_template = "admin/custom_index.html"
 

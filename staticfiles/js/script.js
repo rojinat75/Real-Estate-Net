@@ -1,5 +1,5 @@
 /**
- * Profile Dropdown Functionality for Real Estate Nepal
+ * Profile Dropdown Functionality for Real Estate Net
  */
 
 /**
@@ -11,17 +11,17 @@ function showAccountSettings() {
     alert('Account settings feature is coming soon!\n\nFor now, you can update your profile in the Dashboard.');
 }
 
-// Initialize Nepal colors (fallback for CSS variables)
-function initNepalColors() {
-    // Ensure Nepal colors are applied even if CSS variables fail
+// Initialize brand colors (fallback for CSS variables)
+function initBrandColors() {
+    // Ensure brand colors are applied even if CSS variables fail
     document.documentElement.style.setProperty('--nepal-blue', '#0033A0');
     document.documentElement.style.setProperty('--nepal-crimson', '#DC143C');
 }
 
 // Initialize map when page loads
 document.addEventListener('DOMContentLoaded', function() {
-    // Initialize Neil Pais
-    initNepalColors();
+    // Initialize brand colors
+    initBrandColors();
 
     // Initialize map only if map element exists
     const mapElement = document.getElementById('map');
@@ -242,7 +242,7 @@ function initializeCarousel() {
 }
 
 /**
- * FUNNY INTERACTIVE LOGIN ANIMATIONS FOR REAL ESTATE NEPAL
+ * FUNNY INTERACTIVE LOGIN ANIMATIONS FOR REAL ESTATE NET
  */
 
 let partyMode = false;

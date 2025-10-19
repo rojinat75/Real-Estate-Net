@@ -2,15 +2,15 @@
 {% load static %}
 {% load humanize %}
 
-{% block title %}Real Estate Nepal - Your Marketplace for Properties in Nepal{% endblock %}
+{% block title %}Real Estate Net - Your Marketplace for Properties{% endblock %}
 
 {% block extra_css %}
 <style>
-/* Root Variables for Nepal Flag Colors */
+/* Root Variables for Global Flag Colors */
 :root {
-    --nepal-blue: #0033A0;
-    --nepal-crimson: #DC143C;
-    --nepal-white: #FFFFFF;
+    --brand-blue: #0033A0;
+    --brand-crimson: #DC143C;
+    --brand-white: #FFFFFF;
 }
 
 /* Hero Section with Background Image */
@@ -474,7 +474,7 @@
 {% block content %}
     <section class="hero-section">
         <div class="hero-top">
-            <h1 class="hero-title">Find Your Dream Property in Nepal</h1>
+            <h1 class="hero-title">Find Your Dream Property Worldwide</h1>
         </div>
         <div class="hero-center">
             <form action="{% url 'properties:search_results' %}" method="get" class="search-form-professional">
@@ -560,7 +560,7 @@
     <section class="cta-section">
         <div class="container">
             <h2>Start Your Real Estate Journey Today!</h2>
-            <p>Join Nepal's premier property marketplace</p>
+            <p>The world's premier property marketplace</p>
             <div class="cta-buttons">
                 {% if user.is_authenticated %}
                     <a href="{% url 'properties:property_create' %}" class="cta-btn primary">List Your Property</a>
