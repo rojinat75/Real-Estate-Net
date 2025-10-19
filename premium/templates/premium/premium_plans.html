@@ -1,0 +1,367 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Premium Plans - Gorkha Real Estate{% endblock %}
+
+{% block extra_css %}
+<style>
+.premium-container {
+    max-width: 1000px;
+    margin: 0 auto;
+    padding: 30px 20px;
+    background: #f8f9fa;
+    min-height: 100vh;
+}
+
+.header {
+    text-align: center;
+    margin-bottom: 40px;
+    padding: 30px;
+    background: linear-gradient(135deg, var(--nepal-blue), var(--nepal-crimson));
+    color: white;
+    border-radius: 15px;
+    box-shadow: 0 8px 25px rgba(0,0,0,0.15);
+}
+
+.header h1 {
+    margin: 0 0 15px 0;
+    font-size: 2.5em;
+    font-weight: 900;
+    text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+}
+
+.header p {
+    margin: 0;
+    font-size: 1.2em;
+    opacity: 0.95;
+}
+
+.plans-section {
+    margin-bottom: 40px;
+}
+
+.plans-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 25px;
+    margin-bottom: 30px;
+}
+
+.plan-card {
+    background: white;
+    border-radius: 15px;
+    padding: 30px;
+    text-align: center;
+    box-shadow: 0 8px 25px rgba(0,0,0,0.1);
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+    border: 2px solid transparent;
+    position: relative;
+}
+
+.plan-card:hover {
+    transform: translateY(-8px);
+    box-shadow: 0 15px 35px rgba(0,0,0,0.15);
+    border-color: var(--nepal-blue);
+}
+
+.plan-card.popular {
+    border-color: var(--nepal-crimson);
+    transform: scale(1.02);
+}
+
+.plan-card.popular:hover {
+    transform: scale(1.02) translateY(-8px);
+}
+
+.popular-badge {
+    position: absolute;
+    top: -10px;
+    right: 20px;
+    background: var(--nepal-crimson);
+    color: white;
+    padding: 5px 15px;
+    border-radius: 15px;
+    font-size: 0.8em;
+    font-weight: 700;
+    text-transform: uppercase;
+}
+
+.plan-name {
+    font-size: 1.8em;
+    color: var(--nepal-blue);
+    margin-bottom: 10px;
+    font-weight: 800;
+}
+
+.plan-duration {
+    color: #666;
+    font-size: 1.1em;
+    margin-bottom: 20px;
+}
+
+.plan-price {
+    font-size: 2.5em;
+    color: var(--nepal-crimson);
+    font-weight: 900;
+    margin-bottom: 25px;
+}
+
+.plan-features {
+    list-style: none;
+    padding: 0;
+    margin: 25px 0;
+    text-align: left;
+}
+
+.plan-features li {
+    padding: 8px 0;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    color: #555;
+    font-size: 0.95em;
+}
+
+.plan-features li i {
+    color: var(--nepal-blue);
+    font-size: 1.1em;
+    width: 20px;
+    text-align: center;
+}
+
+.plan-button {
+    background: linear-gradient(135deg, var(--nepal-blue), var(--nepal-crimson));
+    color: white;
+    border: none;
+    padding: 15px 35px;
+    border-radius: 25px;
+    font-size: 1.1em;
+    font-weight: 700;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    width: 100%;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.plan-button:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 20px rgba(0,51,160,0.4);
+}
+
+.payment-info {
+    background: white;
+    padding: 30px;
+    border-radius: 15px;
+    box-shadow: 0 8px 25px rgba(0,0,0,0.1);
+    text-align: center;
+}
+
+.payment-info h2 {
+    color: var(--nepal-blue);
+    margin-bottom: 25px;
+    font-size: 1.8em;
+}
+
+.payment-methods {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 20px;
+    margin-bottom: 25px;
+}
+
+.payment-method {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 15px;
+    background: #f8f9fa;
+    border-radius: 10px;
+    border: 2px solid #e9ecef;
+    transition: all 0.3s ease;
+}
+
+.payment-method:hover {
+    border-color: var(--nepal-blue);
+    background: #e3f2fd;
+}
+
+.payment-method i {
+    font-size: 1.8em;
+    color: var(--nepal-blue);
+    width: 40px;
+    text-align: center;
+}
+
+.payment-method div {
+    text-align: left;
+}
+
+.payment-method h4 {
+    margin: 0 0 5px 0;
+    color: var(--nepal-blue);
+    font-size: 1em;
+}
+
+.payment-method p {
+    margin: 0;
+    color: #666;
+    font-size: 0.85em;
+}
+
+.contact-info {
+    background: #fff3cd;
+    padding: 20px;
+    border-radius: 10px;
+    border-left: 4px solid #ffc107;
+    margin-top: 20px;
+}
+
+.contact-info h3 {
+    color: #856404;
+    margin-bottom: 15px;
+    text-align: center;
+}
+
+.contact-details {
+    display: flex;
+    justify-content: center;
+    gap: 25px;
+    flex-wrap: wrap;
+}
+
+.contact-item {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.contact-item i {
+    color: #856404;
+}
+
+@media (max-width: 768px) {
+    .plans-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .header h1 {
+        font-size: 2em;
+    }
+
+    .payment-methods {
+        grid-template-columns: 1fr;
+    }
+
+    .contact-details {
+        flex-direction: column;
+        align-items: center;
+        gap: 10px;
+    }
+}
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="premium-container">
+    <div class="header">
+        <h1>🏆 Choose Premium Plan</h1>
+        <p>Get more visibility and inquiries for your properties</p>
+    </div>
+
+    <div class="plans-section">
+        <div class="plans-grid">
+            {% for plan in plans %}
+            <div class="plan-card {% if plan.name == 'Featured Listing' %}popular{% endif %}">
+                {% if plan.name == 'Featured Listing' %}
+                <div class="popular-badge">Most Popular</div>
+                {% endif %}
+
+                <div class="plan-name">{{ plan.name }}</div>
+                <div class="plan-duration">{{ plan.duration }}</div>
+                <div class="plan-price">NPR {{ plan.price|intcomma }}</div>
+
+                <ul class="plan-features">
+                    {% for feature in plan.features %}
+                    <li>
+                        <i class="fas fa-check"></i>
+                        {{ feature }}
+                    </li>
+                    {% endfor %}
+                </ul>
+
+                <a href="{% url 'premium:premium_form' %}?plan={{ plan.name|lower|slugify }}" style="text-decoration: none;">
+                    <button class="plan-button">Choose This Plan</button>
+                </a>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+
+    <div class="payment-info">
+        <h2>💳 Payment Methods</h2>
+        <div class="payment-methods">
+            <div class="payment-method">
+                <i class="fas fa-mobile-alt"></i>
+                <div>
+                    <h4>eSewa</h4>
+                    <p>Digital wallet</p>
+                </div>
+            </div>
+            <div class="payment-method">
+                <i class="fas fa-wallet"></i>
+                <div>
+                    <h4>Khalti</h4>
+                    <p>Digital wallet</p>
+                </div>
+            </div>
+            <div class="payment-method">
+                <i class="fas fa-credit-card"></i>
+                <div>
+                    <h4>Cards</h4>
+                    <p>Credit/Debit cards</p>
+                </div>
+            </div>
+            <div class="payment-method">
+                <i class="fas fa-university"></i>
+                <div>
+                    <h4>Bank Transfer</h4>
+                    <p>Direct bank transfer</p>
+                </div>
+            </div>
+            <div class="payment-method">
+                <i class="fas fa-mobile"></i>
+                <div>
+                    <h4>Mobile Banking</h4>
+                    <p>Bank mobile apps</p>
+                </div>
+            </div>
+            <div class="payment-method">
+                <i class="fas fa-money-bill-wave"></i>
+                <div>
+                    <h4>Cash</h4>
+                    <p>Office payment</p>
+                </div>
+            </div>
+        </div>
+
+        <div class="contact-info">
+            <h3>📞 Need Help?</h3>
+            <div class="contact-details">
+                <div class="contact-item">
+                    <i class="fas fa-phone"></i>
+                    <span>+977-1234567890</span>
+                </div>
+                <div class="contact-item">
+                    <i class="fas fa-envelope"></i>
+                    <span>admin@gorkharealestate.com</span>
+                </div>
+                <div class="contact-item">
+                    <i class="fab fa-whatsapp"></i>
+                    <span>+977-1234567890</span>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

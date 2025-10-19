@@ -1,0 +1,575 @@
+{% extends 'base.html' %}
+{% load static %}
+{% load humanize %}
+
+{% block title %}Real Estate Nepal - Your Marketplace for Properties in Nepal{% endblock %}
+
+{% block extra_css %}
+<style>
+/* Root Variables for Nepal Flag Colors */
+:root {
+    --nepal-blue: #0033A0;
+    --nepal-crimson: #DC143C;
+    --nepal-white: #FFFFFF;
+}
+
+/* Hero Section with Background Image */
+.hero-section {
+    background: url('{% static "images/bg.jpg" %}');
+    background-size: cover;
+    background-position: center;
+    background-attachment: fixed;
+    color: white;
+    padding: 80px 20px 60px;
+    text-align: center;
+    min-height: 90vh;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-start;
+    align-items: center;
+    position: relative;
+}
+
+.hero-title {
+    color: white;
+    font-size: 3.5em;
+    font-weight: 900;
+    margin: 0 0 50px 0;
+    text-shadow:
+        1px 1px 0px #e0e0e0,
+        2px 2px 0px #c8c8c8,
+        3px 3px 0px #b0b0b0,
+        4px 4px 0px #989898,
+        5px 5px 0px #808080,
+        6px 6px 10px rgba(0,0,0,0.5);
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    line-height: 1.1;
+    position: relative;
+    z-index: 2;
+}
+
+@keyframes titleGlow {
+    from {
+        text-shadow:
+            0 0 5px rgba(255,255,255,0.8),
+            0 0 10px rgba(255,255,255,0.6),
+            0 0 15px rgba(255,255,255,0.4),
+            3px 3px 8px rgba(0,0,0,0.9);
+    }
+    to {
+        text-shadow:
+            0 0 10px rgba(255,255,255,1),
+            0 0 20px rgba(255,255,255,0.8),
+            0 0 30px rgba(255,255,255,0.6),
+            0 0 40px rgba(255,255,255,0.4),
+            5px 5px 12px rgba(0,0,0,1);
+    }
+}
+
+/* Fallback for browsers that don't support background-clip */
+@supports not (-webkit-background-clip: text) or not (background-clip: text) {
+    .hero-title {
+        background: none;
+        -webkit-text-fill-color: #FFFFFF;
+        color: #FFFFFF;
+        text-shadow:
+            3px 3px 0px rgba(220,20,60,0.8),
+            6px 6px 0px rgba(0,51,160,0.6),
+            9px 9px 5px rgba(0,0,0,0.3);
+        border: 4px solid;
+        border-image: linear-gradient(to bottom, #DC143C 25%, #FFFFFF 25% 60%, #0033A0 60%) 1;
+        padding: 10px 20px;
+        border-radius: 10px;
+        background: rgba(0,0,0,0.2);
+    }
+}
+
+.search-form {
+    max-width: 900px;
+    margin: 20px auto 0;
+    background: rgba(255,255,255,0.9);
+    padding: 30px;
+    border-radius: 12px;
+    box-shadow: 0 5px 20px rgba(0,0,0,0.2);
+    backdrop-filter: blur(5px);
+    border: 1px solid rgba(255,255,255,0.3);
+}
+
+.search-controls {
+    display: flex;
+    gap: 15px;
+    margin-bottom: 30px;
+    flex-wrap: wrap;
+    justify-content: center;
+}
+
+.search-input {
+    flex: 2;
+    min-width: 300px;
+    padding: 15px;
+    border: 2px solid var(--nepal-blue);
+    border-radius: 8px;
+    font-size: 16px;
+    transition: border-color 0.3s;
+}
+
+.search-input:focus {
+    outline: none;
+    border-color: #ff6b6b;
+}
+
+.property-select {
+    flex: 1;
+    min-width: 200px;
+    padding: 15px;
+    border: 2px solid var(--nepal-blue);
+    border-radius: 8px;
+    font-size: 16px;
+    background: white;
+}
+
+.search-btn {
+    background: linear-gradient(135deg, var(--nepal-blue), var(--nepal-crimson));
+    color: white;
+    border: none;
+    padding: 15px 30px;
+    border-radius: 8px;
+    font-size: 16px;
+    font-weight: bold;
+    cursor: pointer;
+    transition: transform 0.3s;
+}
+
+.search-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+}
+
+/* Section Styles */
+.section {
+    padding: 60px 20px;
+}
+
+.section h2 {
+    color: var(--nepal-blue);
+    text-align: center;
+    font-size: 2.5em;
+    margin-bottom: 40px;
+    background: none !important;
+    background-color: transparent !important;
+}
+
+.container {
+    max-width: 1200px;
+    margin: 0 auto;
+}
+
+/* Property Grid */
+.property-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+    gap: 30px;
+}
+
+.property-card {
+    background: rgba(0,0,0,0.1);
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(255,255,255,0.3);
+    border-radius: 10px;
+    overflow: hidden;
+    box-shadow: 0 5px 15px rgba(0,0,0,0.4);
+    transition: transform 0.3s;
+}
+
+.property-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 15px 25px rgba(0,0,0,0.2);
+}
+
+.property-card img {
+    width: 100%;
+    height: 250px;
+    object-fit: cover;
+}
+
+.no-image {
+    height: 250px;
+    background: rgba(0,0,0,0.1);
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(255,255,255,0.3);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--nepal-blue);
+    font-size: 1.2em;
+    border-radius: 8px;
+}
+
+.property-content {
+    padding: 20px;
+}
+
+.property-card h3 {
+    color: #bc0303ff;
+    margin: 0 0 10px 0;
+    font-size: 1.3em;
+}
+
+.location {
+    color: var(--nepal-blue);
+    margin: 5px 0;
+    font-weight: 500;
+}
+
+.price {
+    color: var(--nepal-crimson);
+    font-size: 1.3em;
+    font-weight: bold;
+    margin: 10px 0;
+}
+
+.view-details-btn {
+    display: inline-block;
+    background: var(--nepal-blue);
+    color: white;
+    padding: 10px 20px;
+    text-decoration: none;
+    border-radius: 5px;
+    transition: background 0.3s;
+}
+
+.view-details-btn:hover {
+    background: #002a70;
+}
+
+/* Featured Section */
+.featured-section {
+    background: #f8f9fa;
+}
+
+/* CTA Section */
+.cta-section {
+    background: linear-gradient(135deg, var(--nepal-blue), #0056d2);
+    color: white;
+    text-align: center;
+}
+
+.cta-section h2 {
+    color: white;
+    margin-bottom: 20px;
+}
+
+.cta-buttons {
+    display: flex;
+    gap: 20px;
+    justify-content: center;
+    margin-top: 30px;
+}
+
+.cta-btn {
+    display: inline-block;
+    padding: 15px 30px;
+    border-radius: 8px;
+    text-decoration: none;
+    font-weight: bold;
+    font-size: 1.1em;
+    transition: transform 0.3s;
+}
+
+.cta-btn.primary {
+    background: white;
+    color: var(--nepal-blue);
+}
+
+.cta-btn.secondary {
+    background: var(--nepal-crimson);
+    color: white;
+}
+
+.cta-btn:hover {
+    transform: translateY(-3px);
+}
+
+.hero-section {
+    flex: 1;
+}
+
+.hero-top {
+    flex: 0 0 auto;
+    padding-bottom: 60px;
+}
+
+.hero-center {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 40px 0;
+}
+
+.hero-spacer {
+    flex: 1;
+}
+
+.search-form-professional {
+    padding: 40px;
+    max-width: 800px;
+    width: 100%;
+    margin: 0 auto;
+    position: relative;
+    background: none !important;
+    background-color: transparent !important;
+    border: none !important;
+    box-shadow: none !important;
+}
+
+.search-header {
+    text-align: center;
+    margin-bottom: 30px;
+}
+
+.search-header h2 {
+    color: white;
+    font-size: 2.2em;
+    margin: 0 0 10px 0;
+    font-weight: 800;
+    text-shadow: 2px 2px 4px rgba(0,0,0,0.7);
+}
+
+.search-header p {
+    color: white;
+    margin: 0;
+    font-size: 1.1em;
+    opacity: 0.9;
+    text-shadow: 1px 1px 2px rgba(0,0,0,0.7);
+}
+
+.search-input-group {
+    display: flex;
+    gap: 15px;
+    margin-bottom: 30px;
+    flex-wrap: wrap;
+    justify-content: center;
+}
+
+.search-input-pro {
+    flex: 2;
+    min-width: 320px;
+    padding: 18px 20px;
+    border: 3px solid rgba(0,51,160,0.3);
+    border-radius: 12px;
+    font-size: 18px;
+    font-weight: 700;
+    transition: all 0.3s ease;
+    background: rgba(255,255,255,0.2) !important;
+    background-color: rgba(255,255,255,0.2) !important;
+    outline: none;
+    color: white;
+}
+
+.search-input-pro:focus {
+    border-color: var(--nepal-blue);
+    box-shadow: 0 0 0 5px rgba(0,51,160,0.1);
+    background: rgba(255,255,255,1);
+}
+
+/* Placeholder text styling */
+.search-input-pro::placeholder {
+    color: white !important;
+    opacity: 0.9;
+    font-weight: 700;
+}
+
+.property-select-pro {
+    flex: 1;
+    min-width: 250px;
+    padding: 18px 20px;
+    border: 3px solid rgba(0,51,160,0.3);
+    border-radius: 12px;
+    font-size: 18px;
+    font-weight: 700;
+    background: rgba(255,255,255,0.2) !important;
+    background-color: rgba(255,255,255,0.2) !important;
+    transition: all 0.3s ease;
+    outline: none;
+    color: white;
+}
+
+.property-select-pro:focus {
+    border-color: var(--nepal-blue);
+    box-shadow: 0 0 0 5px rgba(0,51,160,0.1);
+    background: rgba(255,255,255,1);
+}
+
+.search-btn-pro {
+    background: linear-gradient(135deg, var(--nepal-blue), var(--nepal-crimson));
+    color: white;
+    border: none;
+    padding: 18px 35px;
+    border-radius: 12px;
+    font-size: 18px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    white-space: nowrap;
+    flex-shrink: 0;
+}
+
+.search-btn-pro:hover {
+    transform: translateY(-3px) scale(1.05);
+    box-shadow: 0 15px 30px rgba(0,51,160,0.4);
+}
+
+.search-features {
+    display: flex;
+    justify-content: center;
+    gap: 30px;
+    flex-wrap: wrap;
+    margin-top: 25px;
+}
+
+.feature-item {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.feature-icon {
+    font-size: 1.5em;
+}
+
+.feature-text {
+    color: white;
+    font-weight: 600;
+    font-size: 1em;
+    text-shadow: 1px 1px 2px rgba(0,0,0,0.7);
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+    .hero-title {
+        font-size: 2.5em;
+    }
+
+    .search-controls {
+        flex-direction: column;
+        align-items: stretch;
+    }
+
+    .property-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .cta-buttons {
+        flex-direction: column;
+        align-items: center;
+    }
+}
+</style>
+{% endblock %}
+
+{% block content %}
+    <section class="hero-section">
+        <div class="hero-top">
+            <h1 class="hero-title">Find Your Dream Property in Nepal</h1>
+        </div>
+        <div class="hero-center">
+            <form action="{% url 'properties:search_results' %}" method="get" class="search-form-professional">
+                <div class="search-header">
+                    <h2>Search Properties</h2>
+                    <p>Find the perfect property that matches your needs</p>
+                </div>
+                <div class="search-controls">
+                    <div class="search-input-group">
+                        <input type="text" name="q" placeholder="🔍 City, address, property type..." class="search-input-pro" required>
+                        <select name="property_type" class="property-select-pro">
+                            <option value="">🏢 All Property Types</option>
+                            <option value="office">🏛️ Office</option>
+                            <option value="retail">🏪 Retail</option>
+                            <option value="industrial">🏭 Industrial</option>
+                            <option value="land">🌾 Land</option>
+                            <option value="multifamily">🏠 Multifamily</option>
+                        </select>
+                        <button type="submit" class="search-btn-pro">🔎 Search Properties</button>
+                    </div>
+                    <div class="search-features">
+                        <div class="feature-item">
+                            <span class="feature-icon">🗺️</span>
+                            <span class="feature-text">Map View Available</span>
+                        </div>
+                        <div class="feature-item">
+                            <span class="feature-icon">⭐</span>
+                            <span class="feature-text">Premium Listings</span>
+                        </div>
+                        <div class="feature-item">
+                            <span class="feature-icon">📊</span>
+                            <span class="feature-text">Detailed Analytics</span>
+                        </div>
+                    </div>
+                </div>
+            </form>
+        </div>
+        <div class="hero-spacer"></div>
+    </section>
+
+    {% if show_properties %}
+    <section class="section available-properties" style="padding: 30px 20px; background: none !important; background-color: transparent !important;">
+        <div class="container">
+            <h2>Available Properties</h2>
+            <div class="property-grid">
+                {% for property in latest_properties %}
+                    <div class="property-card">
+                        {% if property.images.first %}
+                            <img src="{{ property.images.first.image.url }}" alt="{{ property.title }}">
+                        {% elif property.floor_plan_image %}
+                            <img src="{{ property.floor_plan_image.url }}" alt="{{ property.title }} Floor Plan">
+                        {% else %}
+                            <div class="no-image">No Image Available</div>
+                        {% endif %}
+                        <div class="property-content">
+                            <h3>{{ property.title }}{% if property.is_premium %} <span class="premium-badge">⭐ PREMIUM</span>{% endif %}</h3>
+                            <p class="location">{{ property.city }}, {{ property.state }}</p>
+                            <p class="property-type">Type: {{ property.property_type|title }}</p>
+                            <p class="price">NPR {{ property.price|intcomma }}</p>
+                            <a href="{% url 'properties:property_detail' property.pk %}" class="view-details-btn">View Details</a>
+                        </div>
+                    </div>
+                {% empty %}
+                    <div class="property-card">
+                        <div class="no-image">No properties yet</div>
+                        <div class="property-content">
+                            <h3>Welcome to Our Platform!</h3>
+                            <p>Properties will appear here once listed. Sign up as a broker to add the first listing!</p>
+                            <a href="{% url 'properties:property_create' %}" class="view-details-btn">Join as Broker</a>
+                        </div>
+                    </div>
+                {% endfor %}
+            </div>
+            {% if latest_properties %}
+                <div class="view-all-container">
+                    <a href="{% url 'properties:property_list' %}" class="view-all-btn">View All Properties</a>
+                </div>
+            {% endif %}
+        </div>
+    </section>
+    {% endif %}
+
+    <section class="cta-section">
+        <div class="container">
+            <h2>Start Your Real Estate Journey Today!</h2>
+            <p>Join Nepal's premier property marketplace</p>
+            <div class="cta-buttons">
+                {% if user.is_authenticated %}
+                    <a href="{% url 'properties:property_create' %}" class="cta-btn primary">List Your Property</a>
+                    <a href="{% url 'properties:property_list' %}?view=map" class="cta-btn secondary">View Map</a>
+                {% else %}
+                    <a href="{% url 'account_signup' %}" class="cta-btn primary">Join Now Free</a>
+                    <a href="{% url 'account_login' %}" class="cta-btn secondary">Sign In</a>
+                {% endif %}
+            </div>
+        </div>
+    </section>
+{% endblock %}

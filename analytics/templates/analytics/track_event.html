@@ -1,0 +1,11 @@
+{% extends 'base.html' %}
+
+{% block title %}Tracking Event{% endblock %}
+
+{% block content %}
+    <p>Tracking event for property {{ pk }}...</p>
+    <script>
+        // You can add client-side tracking logic here if needed
+        console.log("Tracking event for property {{ pk }}");
+    </script>
+{% endblock %}

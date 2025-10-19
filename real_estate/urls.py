@@ -1,0 +1,171 @@
+"""
+URL configuration for real_estate project.
+
+The `urlpatterns` list routes URLs to views. For more information please see:
+    https://docs.djangoproject.com/en/5.2/topics/http/urls/
+Examples:
+Function views
+    1. Add an import:  from my_app import views
+    2. Add a URL to urlpatterns:  path('', views.home, name='home')
+Class-based views
+    1. Add an import:  from other_app.views import Home
+    2. Add a URL to urlpatterns:  path('', Home.as_view(), name='home')
+Including another URLconf
+    1. Import the include() function: from django.urls import include, path
+    2. Add a URL to urlpatterns:  path('blog/', include('blog.urls'))
+"""
+from django.contrib import admin
+from django.urls import path, include
+from properties.views import home
+from django.conf import settings
+from django.conf.urls.static import static
+
+# Custom admin site with full access for superusers
+class SecureAdminSite(admin.AdminSite):
+    site_header = "🏠 Real Estate Nepal Administration"
+    site_title = "Real Estate Nepal Admin Portal"
+    index_title = "Welcome to Real Estate Admin"
+    index_template = "admin/custom_index.html"
+
+    # Custom CSS for admin branding
+    class Media:
+        css = {
+            'all': ('css/admin_custom.css',)
+        }
+
+    def has_permission(self, request):
+        # Allow superusers full access
+        return request.user.is_superuser
+
+    def each_context(self, request):
+        context = super().each_context(request)
+        context['custom_stats'] = self.get_custom_stats()
+        return context
+
+    def get_custom_stats(self):
+        from properties.models import Property
+        from accounts.models import User
+        from contact.models import ContactInquiry
+        from blog.models import BlogPost
+        from analytics.models import PageView
+        from django.utils import timezone
+        from datetime import timedelta
+
+        # Get date 30 days ago for recent stats
+        thirty_days_ago = timezone.now() - timedelta(days=30)
+
+        return {
+            'total_properties': Property.objects.count(),
+            'verified_properties': Property.objects.filter(is_verified=True).count(),
+            'total_users': User.objects.count(),
+            'total_brokers': User.objects.filter(user_type='broker').count(),
+            'total_buyers': User.objects.filter(user_type='buyer').count(),
+            'pending_verifications': Property.objects.filter(is_verified=False).count(),
+            'recent_properties': Property.objects.filter(created_at__gte=thirty_days_ago).count(),
+            'total_inquiries': ContactInquiry.objects.count(),
+            'unresolved_inquiries': ContactInquiry.objects.filter(is_resolved=False).count(),
+            'total_blog_posts': BlogPost.objects.count(),
+            'published_posts': BlogPost.objects.filter(is_published=True).count(),
+            'total_page_views': PageView.objects.count(),
+            'recent_page_views': PageView.objects.filter(timestamp__gte=thirty_days_ago).count(),
+        }
+
+# Create secure admin instance
+secure_admin = SecureAdminSite(name='secure_admin')
+
+# Import models for admin registration
+from properties.models import Property, PropertyType, Amenity, Image, Company, Location
+from accounts.models import User
+from contact.models import ContactInquiry
+from blog.models import BlogPost
+from analytics.models import PageView
+
+
+# Import admin classes
+from properties.admin import PropertyAdmin, PropertyTypeAdmin, AmenityAdmin, ImageAdmin, CompanyAdmin, LocationAdmin
+
+# Create custom admin classes
+class UserAdmin(admin.ModelAdmin):
+    list_display = ('username', 'email', 'user_type', 'phone_number', 'properties_count', 'is_staff', 'is_active', 'view_properties')
+    list_filter = ('user_type', 'is_staff', 'is_active', 'date_joined')
+    search_fields = ('username', 'email', 'phone_number')
+    fieldsets = (
+        ('Basic Information', {
+            'fields': ('username', 'email', 'password')
+        }),
+        ('Personal Information', {
+            'fields': ('first_name', 'last_name', 'phone_number', 'address', 'user_type')
+        }),
+        ('Permissions', {
+            'fields': ('is_active', 'is_staff', 'is_superuser', 'groups', 'user_permissions')
+        }),
+        ('Important Dates', {
+            'fields': ('last_login', 'date_joined'),
+            'classes': ('collapse',)
+        }),
+    )
+    actions = ['delete_brokers', 'delete_investors', 'delete_tenants']
+
+    def properties_count(self, obj):
+        return obj.properties.count()
+    properties_count.short_description = 'Properties Listed'
+
+    def view_properties(self, obj):
+        url = f'/real-admin/properties/property/?user={obj.id}'
+        return f'<a href="{url}" target="_blank">View Properties</a>'
+    view_properties.short_description = 'Properties'
+    view_properties.allow_tags = True
+
+    def delete_brokers(self, request, queryset):
+        queryset.filter(user_type='broker').delete()
+        self.message_user(request, "Selected broker accounts deleted.")
+    delete_brokers.short_description = 'Delete selected brokers'
+
+    def delete_investors(self, request, queryset):
+        queryset.filter(user_type='investor').delete()
+        self.message_user(request, "Selected investor accounts deleted.")
+    delete_investors.short_description = 'Delete selected investors'
+
+    def delete_tenants(self, request, queryset):
+        queryset.filter(user_type='tenant').delete()
+        self.message_user(request, "Selected tenant accounts deleted.")
+    delete_tenants.short_description = 'Delete selected tenants'
+
+# Register models with custom admin classes
+secure_admin.register(Property, PropertyAdmin)
+secure_admin.register(PropertyType, PropertyTypeAdmin)
+secure_admin.register(Amenity, AmenityAdmin)
+secure_admin.register(Image, ImageAdmin)
+secure_admin.register(Company, CompanyAdmin)
+secure_admin.register(Location, LocationAdmin)
+secure_admin.register(User, UserAdmin)
+secure_admin.register(ContactInquiry)
+secure_admin.register(BlogPost)
+secure_admin.register(PageView)
+
+urlpatterns = [
+    path('real-admin/', secure_admin.urls),  # Real Estate Admin Panel
+
+    # Allauth and Local Accounts URLs
+    path('accounts/', include([
+        path('', include('allauth.urls')),
+        path('', include('accounts.urls', namespace='accounts')),
+    ])),
+
+    # Local app URLs
+    path('properties/', include('properties.urls', namespace='properties')),
+    path('analytics/', include('analytics.urls', namespace='analytics')),
+    path('contact/', include('contact.urls', namespace='contact')),
+    path('blog/', include('blog.urls', namespace='blog')),
+    path('legal/', include('legal.urls', namespace='legal')),
+    path('', home, name='home'),
+]
+
+# Only include default admin if explicitly enabled
+if settings.ADMIN_ENABLED and not settings.ADMIN_RESTRICTED_ACCESS:
+    urlpatterns.insert(0, path('admin/', admin.site.urls))
+
+# Serve media files during development
+if settings.DEBUG:
+    urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
+    urlpatterns += static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)

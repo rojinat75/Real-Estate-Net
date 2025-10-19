@@ -1,0 +1,44 @@
+{% extends 'base.html' %}
+
+{% block title %}Search Results{% endblock %}
+
+{% block content %}
+    <div class="search-container">
+        <h2>Search Properties</h2>
+        <form method="get" action="{% url 'properties:search_results' %}" class="search-form">
+            {{ form.as_p }}
+            <button type="submit">Search</button>
+        </form>
+
+        {% if user.is_authenticated %}
+        <div class="save-search-section">
+            <h3>Save this Search</h3>
+            <form method="post" action="{% url 'properties:save_search' %}" class="save-search-form">
+                {% csrf_token %}
+                <input type="hidden" name="filters" value="{{ request.GET.urlencode }}">
+                <div class="form-group">
+                    <input type="text" name="name" placeholder="Name for this search" required>
+                </div>
+                <div class="form-group">
+                    <label><input type="checkbox" name="alert_enabled"> Enable email alerts for new matches</label>
+                </div>
+                <button type="submit" class="save-search-btn">Save Search</button>
+            </form>
+        </div>
+        {% endif %}
+    </div>
+
+    <h3>Results</h3>
+    <div class="property-list">
+        {% for property in properties %}
+            <div class="property-card">
+                <h3><a href="{% url 'properties:property_detail' property.pk %}">{{ property.title }}</a></h3>
+                <p><strong>Price:</strong> ${{ property.price|floatformat:2 }}</p>
+                <p><strong>Location:</strong> {{ property.city }}, {{ property.state }}</p>
+                <p>{{ property.description|truncatechars:100 }}</p>
+            </div>
+        {% empty %}
+            <p>No properties found matching your criteria.</p>
+        {% endfor %}
+    </div>
+{% endblock %}

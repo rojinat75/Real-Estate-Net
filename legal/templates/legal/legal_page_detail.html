@@ -1,0 +1,10 @@
+{% extends 'base.html' %}
+
+{% block title %}{{ page.title }}{% endblock %}
+
+{% block content %}
+    <div class="container legal-page">
+        <h2>{{ page.title }}</h2>
+        <p>{{ page.content|linebreaksbr }}</p>
+    </div>
+{% endblock %}

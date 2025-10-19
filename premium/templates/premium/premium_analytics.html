@@ -1,0 +1,372 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Premium Analytics - Gorkha Real Estate{% endblock %}
+
+{% block extra_css %}
+<style>
+.analytics-dashboard {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 40px 20px;
+}
+
+.analytics-header {
+    text-align: center;
+    margin-bottom: 50px;
+    background: linear-gradient(135deg, var(--nepal-blue), var(--nepal-crimson));
+    color: white;
+    padding: 40px;
+    border-radius: 15px;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+}
+
+.analytics-header h1 {
+    font-size: 2.5em;
+    margin-bottom: 10px;
+    text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+}
+
+.analytics-header p {
+    font-size: 1.2em;
+    opacity: 0.9;
+    margin: 0;
+}
+
+.overview-stats {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 20px;
+    margin-bottom: 40px;
+}
+
+.stat-card {
+    background: white;
+    padding: 30px;
+    border-radius: 15px;
+    text-align: center;
+    box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+    transition: transform 0.3s ease;
+}
+
+.stat-card:hover {
+    transform: translateY(-5px);
+}
+
+.stat-number {
+    font-size: 3em;
+    font-weight: 900;
+    color: var(--nepal-blue);
+    margin-bottom: 10px;
+}
+
+.stat-label {
+    color: #666;
+    font-size: 1.1em;
+    font-weight: 600;
+}
+
+.performance-section {
+    background: white;
+    border-radius: 15px;
+    padding: 30px;
+    margin-bottom: 30px;
+    box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+}
+
+.performance-section h2 {
+    color: var(--nepal-blue);
+    margin-bottom: 30px;
+    font-size: 1.8em;
+}
+
+.properties-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
+    gap: 20px;
+}
+
+.property-card {
+    background: #f8f9fa;
+    border-radius: 10px;
+    padding: 20px;
+    border-left: 5px solid var(--nepal-blue);
+}
+
+.property-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 15px;
+}
+
+.property-name {
+    font-size: 1.3em;
+    font-weight: 700;
+    color: var(--nepal-blue);
+}
+
+.premium-badge {
+    background: var(--nepal-crimson);
+    color: white;
+    padding: 3px 10px;
+    border-radius: 12px;
+    font-size: 0.8em;
+    font-weight: 600;
+}
+
+.property-stats {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+    gap: 15px;
+}
+
+.stat-item {
+    text-align: center;
+}
+
+.stat-value {
+    font-size: 1.8em;
+    font-weight: 900;
+    color: var(--nepal-crimson);
+    display: block;
+}
+
+.stat-label {
+    font-size: 0.9em;
+    color: #666;
+}
+
+.conversion-rate {
+    background: var(--nepal-blue);
+    color: white;
+    padding: 10px;
+    border-radius: 8px;
+    margin-top: 15px;
+}
+
+.conversion-rate .stat-value {
+    color: white;
+}
+
+.summary-section {
+    background: linear-gradient(135deg, var(--nepal-blue), var(--nepal-crimson));
+    color: white;
+    padding: 30px;
+    border-radius: 15px;
+    text-align: center;
+    margin-top: 30px;
+}
+
+.summary-section h2 {
+    margin-bottom: 20px;
+    font-size: 2em;
+}
+
+.summary-stats {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 20px;
+}
+
+.summary-stat {
+    padding: 20px;
+    background: rgba(255,255,255,0.1);
+    border-radius: 10px;
+}
+
+.summary-stat .stat-value {
+    font-size: 2.5em;
+    font-weight: 900;
+    color: white;
+    display: block;
+    margin-bottom: 5px;
+}
+
+.summary-stat .stat-label {
+    color: rgba(255,255,255,0.9);
+    font-size: 1em;
+}
+
+.no-data {
+    text-align: center;
+    padding: 60px 20px;
+    background: white;
+    border-radius: 15px;
+    box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+}
+
+.no-data i {
+    font-size: 4em;
+    color: #ddd;
+    margin-bottom: 20px;
+}
+
+.no-data h3 {
+    color: var(--nepal-blue);
+    margin-bottom: 15px;
+}
+
+.no-data p {
+    color: #666;
+    margin-bottom: 30px;
+}
+
+.upgrade-btn {
+    background: linear-gradient(135deg, var(--nepal-blue), var(--nepal-crimson));
+    color: white;
+    padding: 15px 30px;
+    border: none;
+    border-radius: 25px;
+    font-size: 1.1em;
+    font-weight: 700;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    text-decoration: none;
+    display: inline-block;
+}
+
+.upgrade-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 10px 20px rgba(0,51,160,0.3);
+}
+
+@media (max-width: 768px) {
+    .properties-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .property-stats {
+        grid-template-columns: repeat(2, 1fr);
+    }
+
+    .analytics-header h1 {
+        font-size: 2em;
+    }
+}
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="analytics-dashboard">
+    <div class="analytics-header">
+        <h1>📊 Premium Analytics Dashboard</h1>
+        <p>Track the performance of your premium listings</p>
+    </div>
+
+    <!-- Overview Statistics -->
+    <div class="overview-stats">
+        <div class="stat-card">
+            <div class="stat-number">{{ total_views }}</div>
+            <div class="stat-label">Total Views</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-number">{{ total_inquiries }}</div>
+            <div class="stat-label">Total Inquiries</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-number">{{ avg_conversion_rate|floatformat:1 }}%</div>
+            <div class="stat-label">Avg Conversion Rate</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-number">{{ property_analytics|length }}</div>
+            <div class="stat-label">Premium Properties</div>
+        </div>
+    </div>
+
+    <!-- Property Performance -->
+    <div class="performance-section">
+        <h2>🏠 Property Performance Details</h2>
+
+        {% if property_analytics %}
+        <div class="properties-grid">
+            {% for analytics in property_analytics %}
+            <div class="property-card">
+                <div class="property-header">
+                    <div class="property-name">{{ analytics.property.title }}</div>
+                    <div class="premium-badge">PREMIUM</div>
+                </div>
+
+                <div class="property-stats">
+                    <div class="stat-item">
+                        <span class="stat-value">{{ analytics.views }}</span>
+                        <span class="stat-label">Views</span>
+                    </div>
+                    <div class="stat-item">
+                        <span class="stat-value">{{ analytics.inquiries }}</span>
+                        <span class="stat-label">Inquiries</span>
+                    </div>
+                </div>
+
+                <div class="conversion-rate">
+                    <span class="stat-value">{{ analytics.conversion_rate|floatformat:1 }}%</span>
+                    <span class="stat-label">Conversion Rate</span>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+        {% else %}
+        <div class="no-data">
+            <i class="fas fa-chart-bar"></i>
+            <h3>No Analytics Data Yet</h3>
+            <p>Your premium properties will start collecting analytics data once they receive views and inquiries.</p>
+            <a href="{% url 'properties:property_list' %}" class="upgrade-btn">View Your Properties</a>
+        </div>
+        {% endif %}
+    </div>
+
+    <!-- Summary Section -->
+    <div class="summary-section">
+        <h2>📈 Performance Summary</h2>
+        <div class="summary-stats">
+            <div class="summary-stat">
+                <span class="stat-value">{{ total_views }}</span>
+                <span class="stat-label">Total Property Views</span>
+            </div>
+            <div class="summary-stat">
+                <span class="stat-value">{{ total_inquiries }}</span>
+                <span class="stat-label">Total Inquiries Generated</span>
+            </div>
+            <div class="summary-stat">
+                <span class="stat-value">{{ avg_conversion_rate|floatformat:1 }}%</span>
+                <span class="stat-label">Average Conversion Rate</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- Tips Section -->
+    <div class="tips-section">
+        <h2>💡 Tips to Improve Performance</h2>
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 20px; margin-top: 20px;">
+            <div style="background: white; padding: 20px; border-radius: 10px; box-shadow: 0 5px 15px rgba(0,0,0,0.1);">
+                <h4 style="color: var(--nepal-blue); margin-bottom: 10px;">📸 High-Quality Photos</h4>
+                <p style="color: #666; margin: 0;">Properties with professional photos get up to 3x more views and inquiries.</p>
+            </div>
+            <div style="background: white; padding: 20px; border-radius: 10px; box-shadow: 0 5px 15px rgba(0,0,0,0.1);">
+                <h4 style="color: var(--nepal-blue); margin-bottom: 10px;">📝 Detailed Descriptions</h4>
+                <p style="color: #666; margin: 0;">Comprehensive property descriptions help buyers make decisions faster.</p>
+            </div>
+            <div style="background: white; padding: 20px; border-radius: 10px; box-shadow: 0 5px 15px rgba(0,0,0,0.1);">
+                <h4 style="color: var(--nepal-blue); margin-bottom: 10px;">⚡ Quick Responses</h4>
+                <p style="color: #666; margin: 0;">Responding to inquiries within 24 hours increases conversion rates significantly.</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+.tips-section {
+    background: white;
+    padding: 30px;
+    border-radius: 15px;
+    margin-top: 30px;
+    box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+}
+
+.tips-section h2 {
+    color: var(--nepal-blue);
+    text-align: center;
+    margin-bottom: 30px;
+}
+</style>
+{% endblock %}
