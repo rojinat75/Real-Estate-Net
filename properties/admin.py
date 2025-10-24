@@ -1,5 +1,8 @@
 from django.contrib import admin
 from django.utils import timezone
+from django.utils.html import format_html
+from django.urls import path
+from django.shortcuts import render, redirect
 from .models import Property, PropertyType, Amenity, Image, SavedSearch, Company, Location
 
 @admin.register(Property)
@@ -123,9 +126,202 @@ class AmenityAdmin(admin.ModelAdmin):
 
 @admin.register(Image)
 class ImageAdmin(admin.ModelAdmin):
-    list_display = ('property', 'caption')
-    list_filter = ('property',)
-    search_fields = ('property__title', 'caption')
+    list_display = ('image_thumbnail', 'property', 'caption', 'status', 'file_size_display', 'dimensions', 'is_fake_suspected', 'created_at')
+    list_filter = ('status', 'is_duplicate', 'created_at', 'property__city', 'property__state')
+    search_fields = ('property__title', 'caption', 'flagged_reason', 'moderation_notes')
+    readonly_fields = ('created_at', 'updated_at', 'file_size', 'width', 'height', 'image_preview')
+    actions = ['approve_images', 'reject_images', 'flag_for_review', 'soft_delete_images', 'mark_as_duplicate', 'restore_images']
+    list_per_page = 25
+
+    fieldsets = (
+        ('📸 Image Information', {
+            'fields': ('property', 'image', 'image_preview', 'caption')
+        }),
+        ('📊 Image Metadata', {
+            'fields': ('file_size', 'width', 'height', 'dimensions'),
+            'classes': ('collapse',)
+        }),
+        ('🚩 Moderation Status', {
+            'fields': ('status', 'flagged_reason', 'flagged_by', 'flagged_at', 'moderation_notes', 'moderated_by', 'moderated_at')
+        }),
+        ('🗑️ Deletion Tracking', {
+            'fields': ('deleted_at', 'deleted_by', 'deletion_reason'),
+            'classes': ('collapse',)
+        }),
+        ('🔍 Duplicate Detection', {
+            'fields': ('is_duplicate', 'duplicate_of'),
+            'classes': ('collapse',)
+        }),
+        ('📅 Timestamps', {
+            'fields': ('created_at', 'updated_at'),
+            'classes': ('collapse',)
+        }),
+    )
+
+    def image_thumbnail(self, obj):
+        """Display thumbnail image in admin list"""
+        if obj.image:
+            return f'<img src="{obj.image.url}" style="width: 60px; height: 60px; object-fit: cover; border-radius: 4px;" />'
+        return "No Image"
+    image_thumbnail.short_description = "Image"
+    image_thumbnail.allow_tags = True
+
+    def image_preview(self, obj):
+        """Display full-size image preview in admin detail"""
+        if obj.image:
+            return f'<img src="{obj.image.url}" style="max-width: 400px; max-height: 400px; object-fit: contain;" />'
+        return "No Image"
+    image_preview.short_description = "Image Preview"
+    image_preview.allow_tags = True
+
+    def file_size_display(self, obj):
+        """Display human-readable file size"""
+        if obj.file_size:
+            size = obj.file_size
+            for unit in ['B', 'KB', 'MB', 'GB']:
+                if size < 1024.0:
+                    return f"{size:.1f} {unit}"
+                size /= 1024.0
+            return f"{size:.1f} TB"
+        return "Unknown"
+    file_size_display.short_description = "Size"
+
+    def dimensions(self, obj):
+        """Display image dimensions"""
+        if obj.width and obj.height:
+            return f"{obj.width}×{obj.height}"
+        return "Unknown"
+    dimensions.short_description = "Dimensions"
+
+    def is_fake_suspected(self, obj):
+        """Display fake suspicion status"""
+        if obj.is_fake_suspected():
+            return "⚠️ Suspected"
+        return "✅ OK"
+    is_fake_suspected.short_description = "Fake Check"
+
+    def approve_images(self, request, queryset):
+        """Bulk approve selected images"""
+        count = 0
+        for image in queryset:
+            if image.status != 'approved':
+                image.approve_image(request.user)
+                count += 1
+        self.message_user(request, f"✅ Approved {count} images.")
+    approve_images.short_description = "Approve selected images"
+
+    def reject_images(self, request, queryset):
+        """Bulk reject selected images"""
+        count = 0
+        for image in queryset:
+            if image.status != 'rejected':
+                image.reject_image(request.user, "Bulk rejection by admin")
+                count += 1
+        self.message_user(request, f"❌ Rejected {count} images.")
+    reject_images.short_description = "Reject selected images"
+
+    def flag_for_review(self, request, queryset):
+        """Bulk flag images for review"""
+        count = 0
+        for image in queryset:
+            if image.status != 'flagged':
+                image.flag_for_review(request.user, "Bulk flagged for review")
+                count += 1
+        self.message_user(request, f"🚩 Flagged {count} images for review.")
+    flag_for_review.short_description = "Flag selected images for review"
+
+    def soft_delete_images(self, request, queryset):
+        """Bulk soft delete images"""
+        count = 0
+        for image in queryset:
+            if image.status != 'deleted':
+                image.soft_delete(request.user, "Bulk deletion by admin")
+                count += 1
+        self.message_user(request, f"🗑️ Soft deleted {count} images.")
+    soft_delete_images.short_description = "Soft delete selected images"
+
+    def mark_as_duplicate(self, request, queryset):
+        """Mark selected images as duplicates"""
+        if len(queryset) < 2:
+            self.message_user(request, "⚠️ Please select at least 2 images to mark as duplicates.", level='warning')
+            return
+
+        # Mark all but the first as duplicates of the first
+        images_list = list(queryset)
+        master_image = images_list[0]
+
+        count = 0
+        for image in images_list[1:]:
+            image.is_duplicate = True
+            image.duplicate_of = master_image
+            image.save()
+            count += 1
+
+        self.message_user(request, f"📋 Marked {count} images as duplicates of {master_image}.")
+    mark_as_duplicate.short_description = "Mark selected as duplicates"
+
+    def restore_images(self, request, queryset):
+        """Restore deleted images"""
+        count = 0
+        for image in queryset:
+            if image.status == 'deleted':
+                image.restore_image(request.user)
+                count += 1
+        self.message_user(request, f"🔄 Restored {count} images.")
+    restore_images.short_description = "Restore selected images"
+
+    def get_queryset(self, request):
+        """Optimize queryset with select_related and prefetch_related"""
+        return super().get_queryset(request).select_related(
+            'property', 'flagged_by', 'moderated_by', 'deleted_by'
+        )
+
+    def save_model(self, request, obj, form, change):
+        """Override save to ensure metadata is populated"""
+        super().save_model(request, obj, form, change)
+        # Trigger metadata population if image was uploaded
+        if 'image' in form.changed_data:
+            obj.save()  # Re-save to populate metadata
+
+    def get_urls(self):
+        """Add custom URLs for image moderation"""
+        urls = super().get_urls()
+        custom_urls = [
+            path('review-queue/', self.image_review_queue, name='properties_image_review_queue'),
+            path('fake-detection/', self.run_fake_detection, name='properties_fake_detection'),
+        ]
+        return custom_urls + urls
+
+    def image_review_queue(self, request):
+        """Display images flagged for review"""
+        flagged_images = Image.objects.filter(status='flagged').select_related('property', 'flagged_by')
+
+        context = {
+            'title': 'Image Review Queue',
+            'flagged_images': flagged_images,
+            'total_flagged': flagged_images.count(),
+        }
+        return render(request, 'admin/properties/image_review_queue.html', context)
+
+    def run_fake_detection(self, request):
+        """Run fake image detection on all images"""
+        from .utils import detect_fake_images
+
+        if request.method == 'POST':
+            # Run detection
+            flagged_count = detect_fake_images()
+
+            self.message_user(
+                request,
+                f"🔍 Fake detection complete. {flagged_count} images flagged for review."
+            )
+            return redirect('admin:properties_image_changelist')
+
+        context = {
+            'title': 'Run Fake Image Detection',
+            'description': 'This will scan all property images and flag suspicious ones for review.',
+        }
+        return render(request, 'admin/properties/fake_detection.html', context)
 
 @admin.register(SavedSearch)
 class SavedSearchAdmin(admin.ModelAdmin):

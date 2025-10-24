@@ -48,13 +48,15 @@ class SecureAdminSite(admin.AdminSite):
         from contact.models import ContactInquiry
         from blog.models import BlogPost
         from analytics.models import PageView
+        from properties.utils import get_image_statistics
         from django.utils import timezone
         from datetime import timedelta
 
         # Get date 30 days ago for recent stats
         thirty_days_ago = timezone.now() - timedelta(days=30)
 
-        return {
+        # Get basic stats
+        basic_stats = {
             'total_properties': Property.objects.count(),
             'verified_properties': Property.objects.filter(is_verified=True).count(),
             'total_users': User.objects.count(),
@@ -69,6 +71,24 @@ class SecureAdminSite(admin.AdminSite):
             'total_page_views': PageView.objects.count(),
             'recent_page_views': PageView.objects.filter(timestamp__gte=thirty_days_ago).count(),
         }
+
+        # Get image stats
+        try:
+            image_stats = get_image_statistics()
+        except Exception:
+            # Fallback if there are issues with image stats
+            image_stats = {
+                'total_images': 0,
+                'flagged_images': 0,
+                'approved_images': 0,
+                'rejected_images': 0,
+                'deleted_images': 0,
+                'duplicate_images': 0,
+            }
+
+        # Combine stats
+        basic_stats.update(image_stats)
+        return basic_stats
 
 # Create secure admin instance
 secure_admin = SecureAdminSite(name='secure_admin')

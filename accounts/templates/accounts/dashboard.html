@@ -92,13 +92,20 @@
                         {% for property in user.properties.all %}
                             <div class="listing-card">
                                 <div class="listing-image">
-                                    {% if property.images.first %}
-                                        <img src="{{ property.images.first.image.url }}" alt="{{ property.title }}">
-                                    {% elif property.floor_plan_image %}
-                                        <img src="{{ property.floor_plan_image.url }}" alt="{{ property.title }} Floor Plan">
-                                    {% else %}
-                                        <div class="no-image-small">No Image</div>
-                                    {% endif %}
+                                    {% with approved_list=property.images.all %}
+                                    {% for image in approved_list %}
+                                        {% if image.status == 'approved' %}
+                                            <img src="{{ image.image.url }}" alt="{{ property.title }}">
+                                            {% break %}
+                                        {% endif %}
+                                    {% empty %}
+                                        {% if property.floor_plan_image %}
+                                            <img src="{{ property.floor_plan_image.url }}" alt="{{ property.title }} Floor Plan">
+                                        {% else %}
+                                            <div class="no-image-small">No Image</div>
+                                        {% endif %}
+                                    {% endfor %}
+                                    {% endwith %}
                                     {% if property.is_premium %}
                                         <span class="premium-badge-small">Premium</span>
                                     {% endif %}

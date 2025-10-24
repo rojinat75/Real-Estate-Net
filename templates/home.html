@@ -522,9 +522,7 @@
             <div class="property-grid">
                 {% for property in latest_properties %}
                     <div class="property-card">
-                        {% if property.images.first %}
-                            <img src="{{ property.images.first.image.url }}" alt="{{ property.title }}">
-                        {% elif property.floor_plan_image %}
+                        {% if property.floor_plan_image %}
                             <img src="{{ property.floor_plan_image.url }}" alt="{{ property.title }} Floor Plan">
                         {% else %}
                             <div class="no-image">No Image Available</div>

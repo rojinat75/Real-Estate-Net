@@ -154,6 +154,14 @@ input[type="button"],
             <h3>{{ custom_stats.total_blog_posts }}</h3>
             <p>Blog Posts</p>
         </div>
+        <div class="dashboard-stats">
+            <h3>{{ image_stats.total_images|default:0 }}</h3>
+            <p>Total Images</p>
+        </div>
+        <div class="dashboard-stats">
+            <h3>{{ image_stats.flagged_images|default:0 }}</h3>
+            <p>Flagged Images</p>
+        </div>
     </div>
 
     <!-- Premium Management Section -->
@@ -258,6 +266,57 @@ input[type="button"],
             <a href="{% url 'secure_admin:contact_contactinquiry_changelist' %}" class="button warning-action">📧 View Inquiries</a>
             <a href="{% url 'secure_admin:properties_company_add' %}" class="button info-action">🏢 Add Company</a>
             <a href="{% url 'secure_admin:properties_location_add' %}" class="button info-action">📍 Add Location</a>
+        </div>
+    </div>
+
+    <!-- Image Moderation Section -->
+    <div class="image-moderation-section">
+        <h2>🖼️ Image Moderation</h2>
+        <div class="moderation-grid">
+            <div class="moderation-card">
+                <div class="moderation-header">
+                    <h3>🚩 Review Queue</h3>
+                    <span class="flagged-count">{{ image_stats.flagged_images|default:0 }}</span>
+                </div>
+                <div class="moderation-actions">
+                    <a href="{% url 'admin:properties_image_review_queue' %}" class="button warning-action">
+                        <i class="fas fa-eye"></i> Review Flagged Images
+                    </a>
+                    <a href="{% url 'admin:properties_fake_detection' %}" class="button info-action">
+                        <i class="fas fa-search"></i> Run Detection
+                    </a>
+                </div>
+            </div>
+
+            <div class="moderation-card">
+                <div class="moderation-header">
+                    <h3>📊 Image Analytics</h3>
+                    <span class="total-count">{{ image_stats.total_images|default:0 }}</span>
+                </div>
+                <div class="moderation-actions">
+                    <a href="{% url 'secure_admin:properties_image_changelist' %}" class="button success-action">
+                        <i class="fas fa-list"></i> View All Images
+                    </a>
+                    <a href="{% url 'secure_admin:properties_image_changelist' %}?status__exact=flagged" class="button secondary-action">
+                        <i class="fas fa-flag"></i> Flagged Only
+                    </a>
+                </div>
+            </div>
+
+            <div class="moderation-card">
+                <div class="moderation-header">
+                    <h3>🗑️ Bulk Operations</h3>
+                    <span class="pending-count">{{ image_stats.rejected_images|default:0 }}</span>
+                </div>
+                <div class="moderation-actions">
+                    <a href="{% url 'secure_admin:properties_image_changelist' %}?status__exact=pending" class="button primary-action">
+                        <i class="fas fa-check"></i> Approve Pending
+                    </a>
+                    <a href="{% url 'secure_admin:properties_image_changelist' %}?status__exact=rejected" class="button danger-action">
+                        <i class="fas fa-times"></i> View Rejected
+                    </a>
+                </div>
+            </div>
         </div>
     </div>
 
@@ -499,6 +558,98 @@ input[type="button"],
     font-size: 0.9em;
 }
 
+/* Image Moderation Section */
+.image-moderation-section {
+    margin-bottom: 40px;
+    padding: 20px;
+    background: #f8f9fa;
+    border-radius: 10px;
+    border: 1px solid #e9ecef;
+}
+
+.image-moderation-section h2 {
+    margin: 0 0 20px 0;
+    color: #0033A0;
+    font-size: 1.5em;
+}
+
+.moderation-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 20px;
+}
+
+.moderation-card {
+    background: white;
+    border-radius: 10px;
+    padding: 20px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    border-left: 4px solid #0033A0;
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.moderation-card:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 5px 15px rgba(0,0,0,0.15);
+}
+
+.moderation-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 15px;
+    padding-bottom: 10px;
+    border-bottom: 1px solid #e9ecef;
+}
+
+.moderation-header h3 {
+    margin: 0;
+    color: #0033A0;
+    font-size: 1.2em;
+    font-weight: 700;
+}
+
+.flagged-count, .total-count, .pending-count {
+    background: linear-gradient(135deg, #dc3545, #c82333);
+    color: white;
+    padding: 5px 12px;
+    border-radius: 15px;
+    font-size: 0.9em;
+    font-weight: 700;
+}
+
+.total-count {
+    background: linear-gradient(135deg, #28a745, #20c997);
+}
+
+.pending-count {
+    background: linear-gradient(135deg, #ffc107, #fd7e14);
+}
+
+.moderation-actions {
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+}
+
+.moderation-actions .button {
+    flex: 1;
+    min-width: 120px;
+    font-size: 11px;
+    padding: 8px 12px;
+    text-align: center;
+}
+
+.button.danger-action {
+    background: linear-gradient(135deg, #dc3545, #c82333) !important;
+    color: white !important;
+}
+
+.button.danger-action:hover {
+    background: linear-gradient(135deg, #c82333, #a02622) !important;
+    box-shadow: 0 4px 8px rgba(220, 53, 69, 0.3) !important;
+}
+
 @media (max-width: 768px) {
     .dashboard-stats-grid {
         grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
@@ -514,6 +665,18 @@ input[type="button"],
 
     .status-grid {
         grid-template-columns: 1fr;
+    }
+
+    .moderation-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .moderation-actions {
+        flex-direction: column;
+    }
+
+    .moderation-actions .button {
+        width: 100%;
     }
 }
 </style>

@@ -1,0 +1,212 @@
+{% extends "admin/base_site.html" %}
+{% load static %}
+{% load admin_urls %}
+
+{% block title %}Image Review Queue{% endblock %}
+
+{% block breadcrumbs %}
+<div class="breadcrumbs">
+    <a href="{% url 'admin:index' %}">Home</a>
+    &rsaquo; <a href="{% url 'admin:app_list' app_label='properties' %}">Properties</a>
+    &rsaquo; <a href="{% url 'admin:properties_image_changelist' %}">Images</a>
+    &rsaquo; Review Queue
+</div>
+{% endblock %}
+
+{% block content %}
+<div class="module">
+    <h2>🚩 Image Review Queue</h2>
+    <p class="description">Images flagged for admin review. Please review each image and take appropriate action.</p>
+
+    {% if flagged_images %}
+        <div class="results">
+            <table id="result_list">
+                <thead>
+                    <tr>
+                        <th scope="col">Image</th>
+                        <th scope="col">Property</th>
+                        <th scope="col">Caption</th>
+                        <th scope="col">Flagged Reason</th>
+                        <th scope="col">Flagged By</th>
+                        <th scope="col">Flagged At</th>
+                        <th scope="col">Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for image in flagged_images %}
+                    <tr class="{% cycle 'row1' 'row2' %}">
+                        <td>
+                            {% if image.image %}
+                                <img src="{{ image.image.url }}" style="width: 80px; height: 60px; object-fit: cover; border-radius: 4px;" alt="{{ image.caption }}">
+                            {% else %}
+                                No Image
+                            {% endif %}
+                        </td>
+                        <td>
+                            <a href="{% url 'admin:properties_property_change' image.property.id %}">{{ image.property.title }}</a>
+                            <br><small>{{ image.property.city }}, {{ image.property.state }}</small>
+                        </td>
+                        <td>{{ image.caption|default:"No caption" }}</td>
+                        <td>{{ image.flagged_reason|default:"No reason provided" }}</td>
+                        <td>
+                            {% if image.flagged_by %}
+                                {{ image.flagged_by.get_full_name|default:image.flagged_by.username }}
+                            {% else %}
+                                Automated System
+                            {% endif %}
+                        </td>
+                        <td>{{ image.flagged_at|date:"M d, Y H:i" }}</td>
+                        <td>
+                            <div style="display: flex; gap: 5px; flex-wrap: wrap;">
+                                <a href="{% url 'admin:properties_image_change' image.id %}" class="button" style="font-size: 11px; padding: 4px 8px;">Review</a>
+                                <form method="post" action="{% url 'admin:properties_image_changelist' %}" style="display: inline;">
+                                    {% csrf_token %}
+                                    <input type="hidden" name="action" value="approve_images">
+                                    <input type="hidden" name="_selected_action" value="{{ image.id }}">
+                                    <button type="submit" class="button" style="font-size: 11px; padding: 4px 8px; background: #28a745;">Approve</button>
+                                </form>
+                                <form method="post" action="{% url 'admin:properties_image_changelist' %}" style="display: inline;">
+                                    {% csrf_token %}
+                                    <input type="hidden" name="action" value="reject_images">
+                                    <input type="hidden" name="_selected_action" value="{{ image.id }}">
+                                    <button type="submit" class="button" style="font-size: 11px; padding: 4px 8px; background: #dc3545;">Reject</button>
+                                </form>
+                                <form method="post" action="{% url 'admin:properties_image_changelist' %}" style="display: inline;">
+                                    {% csrf_token %}
+                                    <input type="hidden" name="action" value="soft_delete_images">
+                                    <input type="hidden" name="_selected_action" value="{{ image.id }}">
+                                    <button type="submit" class="button" style="font-size: 11px; padding: 4px 8px; background: #ffc107; color: #212529;">Delete</button>
+                                </form>
+                            </div>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+
+        <div class="module">
+            <h3>📊 Queue Statistics</h3>
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px;">
+                <div style="background: #f8f9fa; padding: 15px; border-radius: 8px; text-align: center;">
+                    <h4 style="margin: 0 0 10px 0; color: #dc3545;">{{ total_flagged }}</h4>
+                    <p style="margin: 0; color: #6c757d;">Images in Queue</p>
+                </div>
+            </div>
+        </div>
+
+    {% else %}
+        <div class="module">
+            <p>✅ No images are currently flagged for review. Great job!</p>
+            <p><a href="{% url 'admin:properties_fake_detection' %}" class="button">Run Fake Detection</a></p>
+        </div>
+    {% endif %}
+</div>
+
+<style>
+.module {
+    margin-bottom: 20px;
+    background: white;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    overflow: hidden;
+}
+
+.module h2 {
+    background: linear-gradient(135deg, #0033A0, #DC143C);
+    color: white;
+    padding: 15px 20px;
+    margin: 0;
+    font-size: 1.3em;
+}
+
+.module h3 {
+    background: #f8f9fa;
+    color: #0033A0;
+    padding: 10px 20px;
+    margin: 0;
+    font-size: 1.1em;
+    border-bottom: 1px solid #dee2e6;
+}
+
+.description {
+    background: #e3f2fd;
+    color: #1565c0;
+    padding: 10px 20px;
+    margin: 0;
+    font-style: italic;
+}
+
+.results {
+    padding: 0;
+}
+
+#result_list {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+#result_list th {
+    background: #f8f9fa;
+    padding: 12px;
+    text-align: left;
+    border-bottom: 2px solid #dee2e6;
+    font-weight: 600;
+    color: #495057;
+}
+
+#result_list td {
+    padding: 12px;
+    border-bottom: 1px solid #dee2e6;
+    vertical-align: top;
+}
+
+#result_list tr.row1 {
+    background: white;
+}
+
+#result_list tr.row2 {
+    background: #f8f9fa;
+}
+
+#result_list tr:hover {
+    background: #e3f2fd !important;
+}
+
+.button {
+    background: linear-gradient(135deg, #007bff, #0056b3);
+    color: white;
+    border: none;
+    padding: 6px 12px;
+    border-radius: 4px;
+    text-decoration: none;
+    font-size: 12px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    display: inline-block;
+    text-align: center;
+}
+
+.button:hover {
+    background: linear-gradient(135deg, #0056b3, #004085);
+    transform: translateY(-1px);
+    box-shadow: 0 2px 4px rgba(0,123,255,0.3);
+}
+
+@media (max-width: 768px) {
+    #result_list {
+        font-size: 12px;
+    }
+
+    #result_list th,
+    #result_list td {
+        padding: 8px;
+    }
+
+    .button {
+        font-size: 10px;
+        padding: 4px 8px;
+    }
+}
+</style>
+{% endblock %}

@@ -1,5 +1,6 @@
 from django.db import models
 from django.conf import settings
+from django.utils import timezone
 
 class Company(models.Model):
     name = models.CharField(max_length=255)
@@ -117,5 +118,123 @@ class Image(models.Model):
     image = models.ImageField(upload_to='property_images/')
     caption = models.CharField(max_length=255, blank=True, null=True)
 
+    # Moderation fields
+    STATUS_CHOICES = (
+        ('pending', 'Pending Review'),
+        ('approved', 'Approved'),
+        ('rejected', 'Rejected'),
+        ('flagged', 'Flagged for Review'),
+        ('deleted', 'Deleted'),
+    )
+
+    status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='pending')
+    moderation_notes = models.TextField(blank=True, null=True)
+    flagged_reason = models.CharField(max_length=255, blank=True, null=True)
+    flagged_by = models.ForeignKey('accounts.User', on_delete=models.SET_NULL, null=True, blank=True, related_name='flagged_images')
+    flagged_at = models.DateTimeField(null=True, blank=True)
+
+    # Validation fields
+    file_size = models.PositiveIntegerField(null=True, blank=True)  # File size in bytes
+    width = models.PositiveIntegerField(null=True, blank=True)
+    height = models.PositiveIntegerField(null=True, blank=True)
+    is_duplicate = models.BooleanField(default=False)
+    duplicate_of = models.ForeignKey('self', on_delete=models.SET_NULL, null=True, blank=True, related_name='duplicates')
+
+    # Audit fields
+    created_at = models.DateTimeField(default=timezone.now)
+    updated_at = models.DateTimeField(auto_now=True)
+    moderated_at = models.DateTimeField(null=True, blank=True)
+    moderated_by = models.ForeignKey('accounts.User', on_delete=models.SET_NULL, null=True, blank=True, related_name='moderated_images')
+    deleted_at = models.DateTimeField(null=True, blank=True)
+    deleted_by = models.ForeignKey('accounts.User', on_delete=models.SET_NULL, null=True, blank=True, related_name='deleted_images')
+    deletion_reason = models.CharField(max_length=255, blank=True, null=True)
+
+    class Meta:
+        ordering = ['-created_at']
+        indexes = [
+            models.Index(fields=['status']),
+            models.Index(fields=['property', 'status']),
+            models.Index(fields=['flagged_by', 'status']),
+        ]
+
     def __str__(self):
-        return f"Image for {self.property.title}"
+        return f"Image for {self.property.title} ({self.get_status_display()})"
+
+    def save(self, *args, **kwargs):
+        # Auto-populate image metadata
+        if self.image:
+            try:
+                from PIL import Image as PILImage
+                img = PILImage.open(self.image)
+                self.width, self.height = img.size
+                self.file_size = self.image.size
+            except Exception:
+                pass  # Handle cases where PIL can't read the image
+
+        super().save(*args, **kwargs)
+
+    def is_fake_suspected(self):
+        """Check if image is suspected to be fake based on various criteria"""
+        suspicious_indicators = 0
+
+        # Check file size (too small might be fake)
+        if self.file_size and self.file_size < 10240:  # Less than 10KB
+            suspicious_indicators += 1
+
+        # Check dimensions (too small might be fake)
+        if self.width and self.height:
+            if self.width < 300 or self.height < 300:
+                suspicious_indicators += 1
+
+        # Check if marked as duplicate
+        if self.is_duplicate:
+            suspicious_indicators += 1
+
+        # Check if flagged
+        if self.status == 'flagged':
+            suspicious_indicators += 1
+
+        return suspicious_indicators >= 2
+
+    def flag_for_review(self, admin_user, reason):
+        """Flag image for admin review"""
+        from django.utils import timezone
+        self.status = 'flagged'
+        self.flagged_reason = reason
+        self.flagged_by = admin_user
+        self.flagged_at = timezone.now()
+        self.save()
+
+    def approve_image(self, admin_user):
+        """Approve image after review"""
+        from django.utils import timezone
+        self.status = 'approved'
+        self.moderated_at = timezone.now()
+        self.moderated_by = admin_user
+        self.save()
+
+    def reject_image(self, admin_user, reason=None):
+        """Reject image after review"""
+        from django.utils import timezone
+        self.status = 'rejected'
+        self.moderation_notes = reason
+        self.moderated_at = timezone.now()
+        self.moderated_by = admin_user
+        self.save()
+
+    def soft_delete(self, admin_user, reason=None):
+        """Soft delete image (mark as deleted but keep in database)"""
+        from django.utils import timezone
+        self.status = 'deleted'
+        self.deleted_at = timezone.now()
+        self.deleted_by = admin_user
+        self.deletion_reason = reason
+        self.save()
+
+    def restore_image(self, admin_user):
+        """Restore a deleted image"""
+        self.status = 'approved'
+        self.deleted_at = None
+        self.deleted_by = None
+        self.deletion_reason = None
+        self.save()

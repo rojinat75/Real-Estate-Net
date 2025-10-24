@@ -19,19 +19,24 @@
     <div class="property-content">
         <div class="property-left">
             <!-- Image Gallery -->
-            {% if property.images.all %}
+            {% with approved_images=property.images.all %}
             <div class="image-gallery">
                 <div class="main-image">
-                    <img id="current-image" src="{{ property.images.first.image.url }}" alt="{{ property.images.first.caption }}">
-                </div>
-                {% if property.images.count > 1 %}
-                <div class="thumbnail-strip">
-                    {% for image in property.images.all %}
-                    <img src="{{ image.image.url }}" alt="{{ image.caption }}" class="thumbnail {% if forloop.first %}active{% endif %}" onclick="changeImage(this.src)">
+                    {% for image in approved_images %}
+                        {% if image.status == 'approved' %}
+                            <img id="current-image" src="{{ image.image.url }}" alt="{{ image.caption }}" {% if not forloop.first %}style="display: none;"{% endif %}>
+                        {% endif %}
                     {% endfor %}
                 </div>
-                {% endif %}
+                <div class="thumbnail-strip">
+                    {% for image in approved_images %}
+                        {% if image.status == 'approved' %}
+                        <img src="{{ image.image.url }}" alt="{{ image.caption }}" class="thumbnail {% if forloop.first %}active{% endif %}" onclick="changeImage(this.src)">
+                        {% endif %}
+                    {% endfor %}
+                </div>
             </div>
+            {% endwith %}
             {% elif property.floor_plan_image %}
             <div class="image-gallery">
                 <div class="main-image">
