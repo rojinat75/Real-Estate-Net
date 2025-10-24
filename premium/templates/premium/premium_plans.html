@@ -1,5 +1,6 @@
 {% extends 'base.html' %}
 {% load static %}
+{% load humanize %}
 
 {% block title %}Premium Plans - Gorkha Real Estate{% endblock %}
 
@@ -38,6 +39,65 @@
 
 .plans-section {
     margin-bottom: 40px;
+}
+
+.comparison-section {
+    margin-bottom: 50px;
+}
+
+.features-table {
+    width: 100%;
+    border-collapse: collapse;
+    background: white;
+    border-radius: 15px;
+    overflow: hidden;
+    box-shadow: 0 8px 25px rgba(0,0,0,0.1);
+    margin-bottom: 30px;
+}
+
+.features-table th {
+    background: linear-gradient(135deg, var(--nepal-blue), var(--nepal-crimson));
+    color: white;
+    padding: 20px 15px;
+    font-weight: 700;
+    text-align: center;
+    font-size: 1em;
+}
+
+.features-table th:first-child {
+    text-align: left;
+    background: #f1f3f4;
+    color: var(--nepal-blue);
+}
+
+.features-table td {
+    padding: 15px;
+    border-bottom: 1px solid #e9ecef;
+    text-align: center;
+    font-size: 0.9em;
+}
+
+.features-table td:first-child {
+    text-align: left;
+    font-weight: 600;
+    color: #333;
+}
+
+.features-table tr:nth-child(even) {
+    background: #f8f9fa;
+}
+
+.features-table tr:hover {
+    background: #e3f2fd;
+}
+
+.text-success {
+    color: #28a745 !important;
+    font-weight: bold;
+}
+
+.text-muted {
+    color: #6c757d !important;
 }
 
 .plans-grid {
@@ -240,6 +300,73 @@
     color: #856404;
 }
 
+.testimonials-section {
+    margin-bottom: 40px;
+    background: white;
+    padding: 40px;
+    border-radius: 15px;
+    box-shadow: 0 8px 25px rgba(0,0,0,0.1);
+}
+
+.testimonials-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 30px;
+}
+
+.testimonial-card {
+    background: #f8f9fa;
+    padding: 25px;
+    border-radius: 12px;
+    border-left: 4px solid var(--nepal-blue);
+    position: relative;
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.testimonial-card::before {
+    content: '"';
+    font-size: 4em;
+    color: #e9ecef;
+    position: absolute;
+    top: -10px;
+    left: 20px;
+    font-family: 'Georgia', serif;
+    line-height: 1;
+}
+
+.testimonial-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 10px 25px rgba(0,0,0,0.15);
+}
+
+.testimonial-content {
+    font-style: italic;
+    color: #555;
+    margin-bottom: 20px;
+    padding-left: 20px;
+}
+
+.testimonial-author {
+    margin-bottom: 15px;
+    padding-left: 20px;
+}
+
+.testimonial-author strong {
+    color: var(--nepal-blue);
+    font-size: 1.1em;
+}
+
+.testimonial-author span {
+    color: #777;
+    font-size: 0.9em;
+}
+
+.testimonial-rating {
+    color: #ffc107;
+    font-size: 1.2em;
+    padding-left: 20px;
+}
+
 @media (max-width: 768px) {
     .plans-grid {
         grid-template-columns: 1fr;
@@ -270,6 +397,74 @@
     </div>
 
     <div class="plans-section">
+        <!-- Comparison Table -->
+        <div class="comparison-section">
+            <h2 style="text-align: center; margin-bottom: 30px; color: var(--nepal-blue);">📋 Plan Comparison</h2>
+            <div class="comparison-table">
+                <table class="features-table">
+                    <thead>
+                        <tr>
+                            <th>Features</th>
+                            <th>Basic Premium</th>
+                            <th>Featured Listing</th>
+                            <th>Premium Plus</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>📈 Search Priority</td>
+                            <td>Medium priority</td>
+                            <td>High priority</td>
+                            <td>Top priority</td>
+                        </tr>
+                        <tr>
+                            <td>👁️ Analytics Dashboard</td>
+                            <td><i class="fas fa-check text-success"></i></td>
+                            <td><i class="fas fa-check text-success"></i></td>
+                            <td><i class="fas fa-check text-success"></i></td>
+                        </tr>
+                        <tr>
+                            <td>🏷️ Featured Badge</td>
+                            <td><i class="fas fa-check text-success"></i></td>
+                            <td><i class="fas fa-check text-success"></i></td>
+                            <td><i class="fas fa-check text-success"></i></td>
+                        </tr>
+                        <tr>
+                            <td>🏠 Homepage Spotlight</td>
+                            <td><i class="fas fa-times text-muted"></i></td>
+                            <td><i class="fas fa-times text-muted"></i></td>
+                            <td><i class="fas fa-check text-success"></i></td>
+                        </tr>
+                        <tr>
+                            <td>📧 Email Support</td>
+                            <td>Basic support</td>
+                            <td>Priority support</td>
+                            <td>Dedicated support</td>
+                        </tr>
+                        <tr>
+                            <td>📱 Social Media Boost</td>
+                            <td><i class="fas fa-times text-muted"></i></td>
+                            <td><i class="fas fa-check text-success"></i></td>
+                            <td><i class="fas fa-check text-success"></i></td>
+                        </tr>
+                        <tr>
+                            <td>🎥 3D Tour Preparation</td>
+                            <td><i class="fas fa-times text-muted"></i></td>
+                            <td><i class="fas fa-times text-muted"></i></td>
+                            <td><i class="fas fa-check text-success"></i></td>
+                        </tr>
+                        <tr>
+                            <td>📊 Detailed Reports</td>
+                            <td><i class="fas fa-check text-success"></i></td>
+                            <td><i class="fas fa-check text-success"></i></td>
+                            <td><i class="fas fa-check text-success"></i></td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- Plan Cards -->
         <div class="plans-grid">
             {% for plan in plans %}
             <div class="plan-card {% if plan.name == 'Featured Listing' %}popular{% endif %}">
@@ -345,6 +540,50 @@
             </div>
         </div>
 
+        <div class="testimonials-section">
+            <h2 style="text-align: center; margin-bottom: 40px; color: var(--nepal-blue);">⭐ What Our Premium Users Say</h2>
+            <div class="testimonials-grid">
+                <div class="testimonial-card">
+                    <div class="testimonial-content">
+                        "Since upgrading to Premium, my property views increased by 300%! The analytics dashboard is fantastic for tracking interested buyers."
+                    </div>
+                    <div class="testimonial-author">
+                        <strong>Ram Sharma</strong><br>
+                        <span>Property Developer, Kathmandu</span>
+                    </div>
+                    <div class="testimonial-rating">
+                        ★★★★★
+                    </div>
+                </div>
+
+                <div class="testimonial-card">
+                    <div class="testimonial-content">
+                        "The premium placement got my listing sold within 2 weeks! Worth every rupee spent."
+                    </div>
+                    <div class="testimonial-author">
+                        <strong>Sita Thapa</strong><br>
+                        <span>Real Estate Agent, Pokhara</span>
+                    </div>
+                    <div class="testimonial-rating">
+                        ★★★★★
+                    </div>
+                </div>
+
+                <div class="testimonial-card">
+                    <div class="testimonial-content">
+                        "Amazing customer support and detailed reports. My properties get much more inquiries now."
+                    </div>
+                    <div class="testimonial-author">
+                        <strong>Bikash Gurung</strong><br>
+                        <span>Property Broker, Lalitpur</span>
+                    </div>
+                    <div class="testimonial-rating">
+                        ★★★★★
+                    </div>
+                </div>
+            </div>
+        </div>
+
         <div class="contact-info">
             <h3>📞 Need Help?</h3>
             <div class="contact-details">
@@ -354,7 +593,7 @@
                 </div>
                 <div class="contact-item">
                     <i class="fas fa-envelope"></i>
-                    <span>admin@gorkharealestate.com</span>
+                    <span>admin@realestatenet.com</span>
                 </div>
                 <div class="contact-item">
                     <i class="fab fa-whatsapp"></i>

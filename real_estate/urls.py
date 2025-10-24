@@ -79,10 +79,12 @@ from accounts.models import User
 from contact.models import ContactInquiry
 from blog.models import BlogPost
 from analytics.models import PageView
+from premium.models import PremiumListing
 
 
 # Import admin classes
 from properties.admin import PropertyAdmin, PropertyTypeAdmin, AmenityAdmin, ImageAdmin, CompanyAdmin, LocationAdmin
+from premium.admin import PremiumListingAdmin
 
 # Create custom admin classes
 class UserAdmin(admin.ModelAdmin):
@@ -139,6 +141,7 @@ secure_admin.register(Image, ImageAdmin)
 secure_admin.register(Company, CompanyAdmin)
 secure_admin.register(Location, LocationAdmin)
 secure_admin.register(User, UserAdmin)
+secure_admin.register(PremiumListing, PremiumListingAdmin)
 secure_admin.register(ContactInquiry)
 secure_admin.register(BlogPost)
 secure_admin.register(PageView)
@@ -154,6 +157,7 @@ urlpatterns = [
 
     # Local app URLs
     path('properties/', include('properties.urls', namespace='properties')),
+    path('premium/', include('premium.urls', namespace='premium')),
     path('analytics/', include('analytics.urls', namespace='analytics')),
     path('contact/', include('contact.urls', namespace='contact')),
     path('blog/', include('blog.urls', namespace='blog')),

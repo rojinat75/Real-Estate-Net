@@ -135,9 +135,14 @@
 
             <div class="account-actions-section">
                 <h2>Account Actions</h2>
-                <div class="actions-list">
-                    <a href="{% url 'account_logout' %}" class="logout-btn"><i class="fas fa-sign-out-alt"></i> Logout</a>
-                </div>
+                <form id="logout-form" method="post" action="{% url 'account_logout' %}" style="display: none;">
+                  {% csrf_token %}
+                </form>
+
+            <a href="#" class="logout-btn" onclick="document.getElementById('logout-form').submit(); return false;">
+                <i class="fas fa-sign-out-alt"></i> Logout
+            </a>
+
             </div>
         </div>
     </div>

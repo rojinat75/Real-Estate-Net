@@ -3,7 +3,7 @@ from django.urls import reverse, path
 from django.shortcuts import redirect
 from django.utils import timezone
 from datetime import timedelta
-from .models import PremiumListing
+from .models import PremiumListing, PromoCode, EmailNotification
 from properties.models import Property
 from accounts.models import User
 import uuid
@@ -113,7 +113,7 @@ class PremiumListingAdmin(admin.ModelAdmin):
     def get_urls(self):
         urls = super().get_urls()
         custom_urls = [
-            path('manual-create/', self.manual_create_premium, name='manual_create_premium'),
+            path('manual-create/', self.manual_create_premium, name='premium_premiumlisting_manual_create'),
         ]
         return custom_urls + urls
 
@@ -139,7 +139,7 @@ class PremiumListingAdmin(admin.ModelAdmin):
                 if existing:
                     self.message_user(request, f'⚠️ Property "{property_obj.title}" already has active premium status.',
                                     level='warning')
-                    return redirect('admin:premium_premiumlisting_changelist')
+                    return redirect('secure_admin:premium_premiumlisting_changelist')
 
                 # Create premium listing
                 premium_listing = PremiumListing.objects.create(
@@ -157,7 +157,7 @@ class PremiumListingAdmin(admin.ModelAdmin):
                 property_obj.save()
 
                 self.message_user(request, f'✅ Created premium listing for user "{user.username}"')
-                return redirect('admin:premium_premiumlisting_changelist')
+                return redirect('secure_admin:premium_premiumlisting_changelist')
 
             except (Property.DoesNotExist, User.DoesNotExist) as e:
                 self.message_user(request, f'❌ Error: {str(e)}', level='error')
@@ -175,3 +175,82 @@ class PremiumListingAdmin(admin.ModelAdmin):
 
         template = get_template('admin/premium_manual_create.html')
         return HttpResponse(template.render(context, request))
+
+
+@admin.register(PromoCode)
+class PromoCodeAdmin(admin.ModelAdmin):
+    list_display = ('code', 'discount_type', 'discount_value', 'is_active', 'valid_from', 'valid_until', 'times_used', 'max_uses')
+    list_filter = ('discount_type', 'is_active', 'created_at')
+    search_fields = ('code',)
+    readonly_fields = ('created_at', 'times_used')
+    actions = ['deactivate_promo_codes']
+
+    fieldsets = (
+        ('🎫 Promo Code Details', {
+            'fields': ('code', 'discount_type', 'discount_value')
+        }),
+        ('⏰ Validity Period', {
+            'fields': ('valid_from', 'valid_until', 'max_uses')
+        }),
+        ('🔧 Admin Controls', {
+            'fields': ('is_active', 'created_by')
+        }),
+        ('📊 Usage Statistics', {
+            'fields': ('times_used', 'created_at'),
+            'classes': ('collapse',)
+        }),
+    )
+
+    def deactivate_promo_codes(self, request, queryset):
+        count = queryset.update(is_active=False)
+        self.message_user(request, f"⚪ {count} promo codes deactivated.")
+    deactivate_promo_codes.short_description = "Deactivate selected promo codes"
+
+
+@admin.register(EmailNotification)
+class EmailNotificationAdmin(admin.ModelAdmin):
+    list_display = ('notification_type', 'user', 'recipient_email', 'is_sent', 'sent_at', 'created_at')
+    list_filter = ('notification_type', 'is_sent', 'created_at')
+    search_fields = ('user__username', 'user__email', 'recipient_email')
+    readonly_fields = ('created_at', 'sent_at')
+    actions = ['resend_notifications']
+
+    fieldsets = (
+        ('📧 Notification Details', {
+            'fields': ('user', 'notification_type', 'recipient_email')
+        }),
+        ('💬 Content', {
+            'fields': ('subject', 'message')
+        }),
+        ('📡 Status', {
+            'fields': ('is_sent', 'sent_at', 'error_message')
+        }),
+    )
+
+    def resend_notifications(self, request, queryset):
+        from django.core.mail import send_mail
+        from django.conf import settings
+
+        success_count = 0
+        for notification in queryset.filter(is_sent=False):
+            try:
+                # Re-send email
+                send_mail(
+                    subject=notification.subject,
+                    message=notification.message,
+                    from_email=settings.DEFAULT_FROM_EMAIL,
+                    recipient_list=[notification.recipient_email],
+                    fail_silently=False,
+                )
+                notification.sent_at = timezone.now()
+                notification.is_sent = True
+                notification.save()
+                success_count += 1
+            except Exception as e:
+                error_msg = f"Failed to resend: {str(e)}"
+                notification.error_message = error_msg
+                notification.save()
+
+        if success_count > 0:
+            self.message_user(request, f"📧 Successfully resent {success_count} notifications.")
+    resend_notifications.short_description = "Resend selected notifications"

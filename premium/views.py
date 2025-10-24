@@ -6,10 +6,10 @@ from django.utils import timezone
 from datetime import timedelta
 from properties.models import Property
 from accounts.models import User
-from .models import PremiumListing
+from .models import PremiumListing, PromoCode
 from .forms import PremiumListingForm
+from . import utils
 import uuid
-import random
 
 def premium_form(request):
     """General premium upgrade form - allows users to choose which property to upgrade"""
@@ -217,6 +217,41 @@ def payment_processing(request, plan_type, property_pk, payment_method):
     start_date = timezone.now()
     end_date = start_date + timedelta(days=duration_days)
 
+    # Simulate payment processing result
+    # In real app, this would be webhook/callback result
+    payment_success = process_payment_simulation(payment_method, price, request.user)
+
+    if payment_success['success']:
+        # Create premium listing
+        premium_listing = PremiumListing.objects.create(
+            property=property,
+            user=request.user,
+            plan_type=plan_type,
+            amount_paid=price,
+            payment_method=payment_method,
+            payment_status='completed',
+            payment_reference=payment_success.get('reference', ''),
+            payment_details=payment_success,
+            start_date=start_date,
+            end_date=end_date,
+            is_active=True
+        )
+
+        # Update property premium status
+        property.is_premium = True
+        property.save()
+
+        # Send success email
+        utils.send_premium_activated_email(request.user, property, premium_listing)
+
+        messages.success(request, f"Premium listing activated successfully! Your property '{property.title}' is now premium.")
+
+    else:
+        # Log failed payment attempt
+        utils.send_payment_failed_email(request.user, property, plan_type, price,
+                                      payment_success.get('payment_id', 'N/A'))
+        messages.error(request, "Payment failed. Please try again or contact support.")
+
     context = {
         'property': property,
         'plan_type': plan_type,
@@ -226,6 +261,8 @@ def payment_processing(request, plan_type, property_pk, payment_method):
         'start_date': start_date,
         'end_date': end_date,
         'payment_date': start_date,
+        'payment_success': payment_success['success'],
+        'payment_details': payment_success,
     }
     return render(request, 'premium/payment_processing.html', context)
 
@@ -247,24 +284,75 @@ def premium_checkout(request, plan_type, property_pk):
         'premium': 90,     # days
     }
 
-    price = plan_prices.get(plan_type, 500)
+    original_price = plan_prices.get(plan_type, 500)
     duration_days = plan_durations.get(plan_type, 7)
+    discount_amount = 0
+    discounted_price = original_price
+    promo_code_obj = None
 
     if request.method == 'POST':
         payment_method = request.POST.get('payment_method')
+        promo_code = request.POST.get('promo_code', '').strip().upper()
 
         if not payment_method:
             messages.error(request, "Please select a payment method.")
             return redirect('premium:premium_checkout', plan_type=plan_type, property_pk=property_pk)
 
+        # Validate promo code if provided
+        if promo_code:
+            try:
+                promo_obj = PromoCode.objects.get(code=promo_code, is_active=True)
+                if promo_obj.is_valid():
+                    discount_amount = promo_obj.apply_discount(original_price)
+                    discounted_price = promo_obj.apply_discount(original_price)
+                    if promo_obj.use_code():
+                        messages.success(request, f"Promo code applied! You saved NPR {discount_amount:.2f}")
+                        promo_code_obj = promo_obj
+                    else:
+                        messages.error(request, "Sorry, this promo code has reached its usage limit.")
+                        return redirect('premium:premium_checkout', plan_type=plan_type, property_pk=property_pk)
+                else:
+                    messages.error(request, "Invalid or expired promo code.")
+                    return redirect('premium:premium_checkout', plan_type=plan_type, property_pk=property_pk)
+            except PromoCode.DoesNotExist:
+                messages.error(request, "Promo code not found.")
+                return redirect('premium:premium_checkout', plan_type=plan_type, property_pk=property_pk)
+
+        # Store promo code info in session for payment processing
+        request.session['promo_code'] = promo_code_obj.code if promo_code_obj else None
+        request.session['discount_amount'] = discount_amount
+        request.session['final_price'] = discounted_price
+
         # Redirect to payment processing page
         return redirect('premium:payment_processing', plan_type=plan_type, property_pk=property_pk, payment_method=payment_method)
+
+    # Handle GET request - check for existing promo code application
+    applied_promo = request.GET.get('promo', '').strip().upper()
+    applied_discount = 0
+    applied_price = original_price
+
+    if applied_promo:
+        try:
+            promo_obj = PromoCode.objects.get(code=applied_promo, is_active=True)
+            if promo_obj.is_valid():
+                applied_discount = promo_obj.apply_discount(original_price)
+                applied_price = promo_obj.apply_discount(original_price)
+                promo_code_obj = promo_obj
+                messages.success(request, f"Promo code applied! Save NPR {applied_discount:.2f}")
+            else:
+                messages.error(request, "Invalid or expired promo code.")
+        except PromoCode.DoesNotExist:
+            messages.error(request, "Promo code not found.")
 
     context = {
         'property': property,
         'plan_type': plan_type,
-        'price': price,
+        'original_price': original_price,
+        'price': applied_price,
+        'discounted_price': applied_price,
+        'discount_amount': applied_discount,
         'duration_days': duration_days,
+        'promo_code': promo_code_obj,
     }
     return render(request, 'premium/premium_checkout.html', context)
 

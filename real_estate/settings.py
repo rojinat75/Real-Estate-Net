@@ -79,6 +79,7 @@ INSTALLED_APPS = [
     # Local apps
     'accounts',
     'properties',
+    'premium',
     'analytics',
     'contact',
     'blog',
@@ -208,3 +209,139 @@ SOCIAL_AUTH_TWITTER_SECRET = 'your-twitter-client-secret'
 
 SOCIAL_AUTH_LINKEDIN_CLIENT_ID = 'your-linkedin-client-id'
 SOCIAL_AUTH_LINKEDIN_SECRET = 'your-linkedin-client-secret'
+
+
+# Email Configuration
+EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
+EMAIL_HOST = 'smtp.gmail.com'
+EMAIL_PORT = 587
+EMAIL_USE_TLS = True
+EMAIL_HOST_USER = 'your-email@gmail.com'  # Replace with actual email
+EMAIL_HOST_PASSWORD = 'your-app-password'  # Replace with app password
+DEFAULT_FROM_EMAIL = 'admin@gorkharealestate.com'
+
+
+# Premium Email Templates
+PREMIUM_EMAIL_SUBJECTS = {
+    'premium_activated': '🎉 Your Property is Now Premium!',
+    'premium_expiring': '⏰ Your Premium Listing Expires Soon',
+    'premium_expired': '❌ Your Premium Listing Has Expired',
+    'payment_received': '💰 Payment Received - Thank You!',
+    'payment_failed': '⚠️ Payment Failed - Please Try Again',
+}
+
+PREMIUM_EMAIL_TEMPLATES = {
+    'premium_activated': '''
+Dear {user_name},
+
+Congratulations! Your property "{property_title}" has been successfully upgraded to premium status.
+
+Premium Plan: {plan_type}
+Duration: {duration_days} days
+End Date: {end_date}
+
+Benefits of your premium upgrade:
+✓ Higher visibility in search results
+✓ Featured badge display
+✓ Detailed analytics dashboard
+✓ Priority customer support
+
+You can monitor your premium performance at: {dashboard_url}
+
+Thank you for choosing Gorkha Real Estate!
+
+Best regards,
+Gorkha Real Estate Team
+admin@gorkharealestate.com
+    ''',
+
+    'premium_expiring': '''
+Dear {user_name},
+
+This is a reminder that your premium listing for "{property_title}" will expire in {days_remaining} days.
+
+Current Plan: {plan_type}
+Expiry Date: {end_date}
+
+To continue enjoying premium benefits:
+✓ Renew your listing before expiry
+✓ Maintain high visibility for your property
+✓ Keep receiving detailed analytics
+
+Renew now: {renewal_url}
+
+Don't miss out on potential buyers!
+
+Best regards,
+Gorkha Real Estate Team
+admin@gorkharealestate.com
+    ''',
+
+    'premium_expired': '''
+Dear {user_name},
+
+Your premium listing for "{property_title}" has expired.
+
+Expired Plan: {plan_type}
+Expired on: {end_date}
+
+To restore premium benefits:
+✓ Upgrade again at competitive rates
+✓ Regain high search visibility
+✓ Access detailed performance analytics
+
+Upgrade now: {plans_url}
+
+We hope to serve you again!
+
+Best regards,
+Gorkha Real Estate Team
+admin@gorkharealestate.com
+    ''',
+
+    'payment_received': '''
+Dear {user_name},
+
+Thank you for your payment! We've received your payment for the premium upgrade.
+
+Property: {property_title}
+Plan: {plan_type}
+Amount Paid: NPR {amount_paid}
+Payment ID: {payment_id}
+
+Your premium listing is now active and will be valid until {end_date}.
+
+Track your listing performance: {dashboard_url}
+
+Best regards,
+Gorkha Real Estate Team
+admin@gorkharealestate.com
+    ''',
+
+    'payment_failed': '''
+Dear {user_name},
+
+We were unable to process your payment for the premium upgrade.
+
+Property: {property_title}
+Plan: {plan_type}
+Amount: NPR {amount}
+
+Payment ID: {payment_id}
+
+Possible reasons for payment failure:
+• Insufficient funds
+• Card declined
+• Network issues
+• Payment method error
+
+Please try again with a different payment method or contact our support.
+
+Try again: {checkout_url}
+Contact us: support@gorkharealestate.com
+
+Best regards,
+Gorkha Real Estate Team
+admin@gorkharealestate.com
+    ''',
+}

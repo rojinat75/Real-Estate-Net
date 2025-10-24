@@ -1,6 +1,101 @@
 {% extends "admin/index.html" %}
 {% load static %}
 
+{% block extrastyle %}
+{{ block.super }}
+<style>
+/* Ensure apply buttons are visible in admin */
+input[type="submit"][value="Apply"],
+input[type="submit"][value="apply"],
+.button.apply,
+.apply-button {
+    background: linear-gradient(135deg, #28a745, #20c997) !important;
+    border: none !important;
+    color: white !important;
+    padding: 8px 16px !important;
+    border-radius: 6px !important;
+    font-weight: 500 !important;
+    transition: all 0.3s ease !important;
+    text-decoration: none !important;
+    display: inline-block !important;
+    text-align: center !important;
+    cursor: pointer !important;
+    font-size: 13px !important;
+    margin: 5px !important;
+}
+
+input[type="submit"][value="Apply"]:hover,
+input[type="submit"][value="apply"]:hover,
+.button.apply:hover,
+.apply-button:hover {
+    background: linear-gradient(135deg, #218838, #17a2b8) !important;
+    transform: translateY(-1px) !important;
+    box-shadow: 0 4px 8px rgba(40, 167, 69, 0.3) !important;
+}
+
+/* Filter apply buttons */
+#changelist-filter input[type="submit"],
+#changelist-filter button {
+    background: linear-gradient(135deg, #007bff, #0056b3) !important;
+    color: white !important;
+    border: none !important;
+    padding: 6px 12px !important;
+    border-radius: 4px !important;
+    font-size: 12px !important;
+    cursor: pointer !important;
+    margin: 2px 0 !important;
+}
+
+#changelist-filter input[type="submit"]:hover,
+#changelist-filter button:hover {
+    background: linear-gradient(135deg, #0056b3, #004085) !important;
+}
+
+/* Action apply buttons */
+#changelist-form input[type="submit"],
+.submit-row input[type="submit"] {
+    background: linear-gradient(135deg, #dc3545, #c82333) !important;
+    color: white !important;
+    border: none !important;
+    padding: 8px 16px !important;
+    border-radius: 6px !important;
+    font-weight: 500 !important;
+    cursor: pointer !important;
+    margin: 0 5px !important;
+}
+
+#changelist-form input[type="submit"]:hover,
+.submit-row input[type="submit"]:hover {
+    background: linear-gradient(135deg, #c82333, #a02622) !important;
+    box-shadow: 0 4px 8px rgba(220, 53, 69, 0.3) !important;
+}
+
+/* Ensure all admin buttons are visible */
+.admin-button,
+input[type="submit"],
+input[type="button"],
+.button {
+    display: inline-block !important;
+    visibility: visible !important;
+    opacity: 1 !important;
+}
+
+/* Fix for hidden buttons in admin forms */
+.submit-row {
+    display: block !important;
+    visibility: visible !important;
+    opacity: 1 !important;
+}
+
+.submit-row input,
+.submit-row a {
+    display: inline-block !important;
+    visibility: visible !important;
+    opacity: 1 !important;
+}
+</style>
+{% endblock %}
+
 {% block content %}
 <div id="content-main">
     <div class="dashboard-header">
@@ -71,10 +166,10 @@
                     <span class="premium-count">{{ custom_stats.active_premium }}</span>
                 </div>
                 <div class="premium-actions">
-                    <a href="{% url 'admin:premium_premiumlisting_changelist' %}" class="button success-action">
+                    <a href="{% url 'secure_admin:premium_premiumlisting_changelist' %}" class="button success-action">
                         <i class="fas fa-list"></i> View All Premium
                     </a>
-                    <a href="{% url 'admin:premium_premiumlisting_manual_create' %}" class="button primary-action">
+                    <a href="{% url 'secure_admin:premium_premiumlisting_manual_create' %}" class="button primary-action">
                         <i class="fas fa-plus"></i> Add Premium User
                     </a>
                 </div>
@@ -86,10 +181,10 @@
                     <span class="revenue-info">Track Payments</span>
                 </div>
                 <div class="premium-actions">
-                    <a href="{% url 'admin:premium_premiumlisting_changelist' %}" class="button warning-action">
+                    <a href="{% url 'secure_admin:premium_premiumlisting_changelist' %}" class="button warning-action">
                         <i class="fas fa-chart-line"></i> Revenue Analytics
                     </a>
-                    <a href="{% url 'admin:properties_property_changelist' %}" class="button info-action">
+                    <a href="{% url 'secure_admin:properties_property_changelist' %}" class="button info-action">
                         <i class="fas fa-users"></i> Premium Properties
                     </a>
                 </div>
@@ -101,10 +196,10 @@
                     <span class="expiring-count">{{ custom_stats.active_premium }}</span>
                 </div>
                 <div class="premium-actions">
-                    <a href="{% url 'admin:premium_premiumlisting_changelist' %}" class="button secondary-action">
+                    <a href="{% url 'secure_admin:premium_premiumlisting_changelist' %}" class="button secondary-action">
                         <i class="fas fa-clock"></i> Manage Expirations
                     </a>
-                    <a href="{% url 'admin:accounts_user_changelist' %}" class="button info-action">
+                    <a href="{% url 'secure_admin:accounts_user_changelist' %}" class="button info-action">
                         <i class="fas fa-envelope"></i> Send Reminders
                     </a>
                 </div>
@@ -120,7 +215,7 @@
                     <div class="tool-content">
                         <h4>Manual Premium Creation</h4>
                         <p>Add premium status to any user manually</p>
-                        <a href="{% url 'admin:premium_premiumlisting_manual_create' %}" class="button primary-action">Create Premium</a>
+                        <a href="{% url 'secure_admin:premium_premiumlisting_manual_create' %}" class="button primary-action">Create Premium</a>
                     </div>
                 </div>
 
@@ -129,7 +224,7 @@
                     <div class="tool-content">
                         <h4>Revenue Analytics</h4>
                         <p>Track premium subscription revenue</p>
-                        <a href="{% url 'admin:premium_premiumlisting_changelist' %}" class="button success-action">View Revenue</a>
+                        <a href="{% url 'secure_admin:premium_premiumlisting_changelist' %}" class="button success-action">View Revenue</a>
                     </div>
                 </div>
 
@@ -138,7 +233,7 @@
                     <div class="tool-content">
                         <h4>Expiration Management</h4>
                         <p>Manage premium subscription dates</p>
-                        <a href="{% url 'admin:premium_premiumlisting_changelist' %}" class="button warning-action">Manage Dates</a>
+                        <a href="{% url 'secure_admin:premium_premiumlisting_changelist' %}" class="button warning-action">Manage Dates</a>
                     </div>
                 </div>
 
@@ -147,7 +242,7 @@
                     <div class="tool-content">
                         <h4>Bulk Premium Operations</h4>
                         <p>Activate/deactivate multiple premium listings</p>
-                        <a href="{% url 'admin:premium_premiumlisting_changelist' %}" class="button info-action">Bulk Operations</a>
+                        <a href="{% url 'secure_admin:premium_premiumlisting_changelist' %}" class="button info-action">Bulk Operations</a>
                     </div>
                 </div>
             </div>
@@ -158,11 +253,11 @@
     <div class="quick-actions">
         <h2>🚀 Quick Actions</h2>
         <div class="action-buttons">
-            <a href="{% url 'admin:properties_property_add' %}" class="button primary-action">➕ Add New Property</a>
-            <a href="{% url 'admin:accounts_user_changelist' %}" class="button secondary-action">👥 Manage Users</a>
-            <a href="{% url 'admin:contact_contactinquiry_changelist' %}" class="button warning-action">📧 View Inquiries</a>
-            <a href="{% url 'admin:properties_company_add' %}" class="button info-action">🏢 Add Company</a>
-            <a href="{% url 'admin:properties_location_add' %}" class="button info-action">📍 Add Location</a>
+            <a href="{% url 'secure_admin:properties_property_add' %}" class="button primary-action">➕ Add New Property</a>
+            <a href="{% url 'secure_admin:accounts_user_changelist' %}" class="button secondary-action">👥 Manage Users</a>
+            <a href="{% url 'secure_admin:contact_contactinquiry_changelist' %}" class="button warning-action">📧 View Inquiries</a>
+            <a href="{% url 'secure_admin:properties_company_add' %}" class="button info-action">🏢 Add Company</a>
+            <a href="{% url 'secure_admin:properties_location_add' %}" class="button info-action">📍 Add Location</a>
         </div>
     </div>
 

@@ -48,8 +48,8 @@ Visit `http://localhost:8000` to access Real Estate Net.
 
 ## 🛠️ Tech Stack
 
-**Backend**: Django 5.2+, PostgreSQL, Celery, Redis  
-**Frontend**: HTML5, CSS3, JavaScript ES6+, Leaflet Maps  
+**Backend**: Django 5.2+, PostgreSQL, Celery, Redis
+**Frontend**: HTML5, CSS3, JavaScript ES6+, Leaflet Maps
 **Deployment**: Docker, AWS S3, Stripe/PayPal integration
 
 ---

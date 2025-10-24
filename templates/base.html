@@ -149,6 +149,7 @@
                 {% if user.is_authenticated %}
                     <li><a href="{% url 'properties:property_list' %}?listing_type=sale">For Sale</a></li>
                     <li><a href="{% url 'properties:property_list' %}?listing_type=lease">For Lease</a></li>
+                    <li><a href="{% url 'premium:premium_plans' %}">Premium Plans</a></li>
                     <li><a href="#">Agents</a></li>
                     <li><a href="#">Companies</a></li>
                 {% endif %}
@@ -165,14 +166,7 @@
                             <div style="position: absolute; bottom: 2px; right: 2px; width: 8px; height: 8px; background: linear-gradient(45deg, #00ff00, #00aa00); border-radius: 50%; border: 2px solid white; box-shadow: 0 0 6px rgba(0,255,0,0.6); animation: pulse 2s infinite;"></div>
                         </div>
                         <!-- Profile dropdown menu -->
-                        <div class="profile-dropdown-content">
-                            <a href="{% url 'accounts:dashboard' %}"><i class="fas fa-tachometer-alt"></i>My Dashboard</a>
-                            <a href="#" onclick="showAccountSettings()"><i class="fas fa-user-cog"></i>Account Settings</a>
-                            {% if user.user_type == 'broker' %}
-                                <a href="{% url 'properties:property_create' %}"><i class="fas fa-plus-circle"></i>Add Property</a>
-                            {% endif %}
-                            <a href="{% url 'accounts:logout' %}" onclick="return confirm('Are you sure you want to logout?')"><i class="fas fa-sign-out-alt"></i>Logout</a>
-                        </div>
+
                     </li>
                 {% else %}
                     <li><a href="{% url 'account_signup' %}">Register</a></li>
@@ -223,6 +217,12 @@
                 });
             }
         });
+
+        function showAccountSettings() {
+            // Scroll to top since account settings are already in dashboard
+            var dashboardUrl = '{% url "accounts:dashboard" %}';
+            window.location.href = dashboardUrl;
+        }
     </script>
 
     {% block extra_js %}{% endblock %}
