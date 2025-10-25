@@ -1,0 +1,433 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Blog Posts - Real Estate Insights{% endblock %}
+
+{% block content %}
+<div class="blog-container" style="max-width: 1200px; margin: 0 auto; padding: 20px;">
+    <header class="blog-header" style="text-align: center; margin-bottom: 3rem;">
+        <h1 style="color: var(--nepal-blue); font-size: 2.5rem; margin-bottom: 1rem;">Real Estate Blog</h1>
+        <p style="color: #666; font-size: 1.1rem; max-width: 600px; margin: 0 auto;">
+            Get the latest insights, tips, and market updates from our real estate experts
+        </p>
+    </header>
+
+    <div class="blog-list">
+        {% for post in posts %}
+            <article class="blog-card">
+                <div class="blog-card-content">
+                    {% if post.image %}
+                        <div class="blog-card-image">
+                            <img src="{{ post.image.url }}" alt="{{ post.title }}" loading="lazy">
+                        </div>
+                    {% endif %}
+
+                    <div class="blog-card-text">
+                        <h2><a href="{% url 'blog:blog_post' post.pk %}" class="blog-card-title">{{ post.title }}</a></h2>
+
+                        <div class="blog-card-meta">
+                            <span class="meta-item">
+                                <i class="fas fa-user"></i> {{ post.author.get_full_name|default:post.author.username }}
+                            </span>
+                            <span class="meta-item">
+                                <i class="fas fa-calendar"></i> {{ post.published_date|date:"F d, Y" }}
+                            </span>
+                            {% if post.excerpt %}
+                                <div class="meta-excerpt">{{ post.excerpt }}</div>
+                            {% endif %}
+                        </div>
+
+                        <div class="blog-card-excerpt">
+                            <p>{{ post.content|striptags|truncatechars:200 }}</p>
+                        </div>
+
+                        <div class="blog-card-actions">
+                            <a href="{% url 'blog:blog_post' post.pk %}" class="read-more-btn">Read More</a>
+
+                            <!-- Mini Share Buttons -->
+                            <div class="mini-share-section">
+                                <span class="share-label">Share:</span>
+                                <div class="mini-share-buttons">
+                                    <button class="mini-share-btn facebook" onclick="shareToFacebook('{{ post.title|escapejs }}', '{{ request.scheme }}://{{ request.get_host }}{% url "blog:blog_post" post.pk %}', '{{ post.author.get_full_name|default:post.author.username|escapejs }}')" title="Share on Facebook">
+                                        <i class="fab fa-facebook-f"></i>
+                                    </button>
+                                    <button class="mini-share-btn twitter" onclick="shareToTwitter('{{ post.title|escapejs }}', '{{ request.scheme }}://{{ request.get_host }}{% url "blog:blog_post" post.pk %}')" title="Share on Twitter">
+                                        <i class="fab fa-twitter"></i>
+                                    </button>
+                                    <button class="mini-share-btn linkedin" onclick="shareToLinkedIn('{{ post.title|escapejs }}', '{{ request.scheme }}://{{ request.get_host }}{% url "blog:blog_post" post.pk %}')" title="Share on LinkedIn">
+                                        <i class="fab fa-linkedin-in"></i>
+                                    </button>
+                                    <button class="mini-share-btn whatsapp" onclick="shareToWhatsApp('{{ post.title|escapejs }}', '{{ request.scheme }}://{{ request.get_host }}{% url "blog:blog_post" post.pk %}')" title="Share on WhatsApp">
+                                        <i class="fab fa-whatsapp"></i>
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </article>
+        {% empty %}
+            <div class="no-posts" style="text-align: center; padding: 4rem; color: #666;">
+                <i class="fas fa-newspaper" style="font-size: 3rem; margin-bottom: 1rem;"></i>
+                <h3>No blog posts available</h3>
+                <p>Check back later for the latest real estate insights and market updates.</p>
+            </div>
+        {% endfor %}
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_css %}
+<style>
+/* Blog Container Styles */
+.blog-container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 20px;
+}
+
+.blog-header {
+    text-align: center;
+    margin-bottom: 3rem;
+    padding-bottom: 2rem;
+    border-bottom: 2px solid #f0f0f0;
+}
+
+.blog-header h1 {
+    color: var(--nepal-blue);
+    font-size: 2.5rem;
+    margin-bottom: 1rem;
+    font-weight: 700;
+}
+
+.blog-header p {
+    color: #666;
+    font-size: 1.1rem;
+    max-width: 600px;
+    margin: 0 auto;
+    line-height: 1.6;
+}
+
+.blog-list {
+    display: grid;
+    gap: 2rem;
+}
+
+.blog-card {
+    background: white;
+    border-radius: 12px;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+    overflow: hidden;
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.blog-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 8px 24px rgba(0,0,0,0.15);
+}
+
+.blog-card-content {
+    display: flex;
+    flex-direction: column;
+}
+
+@media (min-width: 768px) {
+    .blog-card-content {
+        flex-direction: row;
+    }
+}
+
+.blog-card-image {
+    flex-shrink: 0;
+}
+
+@media (min-width: 768px) {
+    .blog-card-image {
+        width: 300px;
+    }
+}
+
+.blog-card-image img {
+    width: 100%;
+    height: 200px;
+    object-fit: cover;
+    display: block;
+}
+
+.blog-card-text {
+    flex: 1;
+    padding: 1.5rem;
+    display: flex;
+    flex-direction: column;
+}
+
+.blog-card-title {
+    margin: 0 0 1rem 0;
+    font-size: 1.5rem;
+    color: var(--nepal-blue);
+    text-decoration: none;
+    font-weight: 600;
+    line-height: 1.3;
+    transition: color 0.3s ease;
+}
+
+.blog-card-title:hover {
+    color: var(--nepal-crimson);
+}
+
+.blog-card-meta {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 1rem;
+    margin-bottom: 1rem;
+    color: #666;
+    font-size: 0.9rem;
+}
+
+.meta-item {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.meta-item i {
+    color: var(--nepal-crimson);
+}
+
+.meta-excerpt {
+    flex-basis: 100%;
+    margin-top: 0.5rem;
+    font-style: italic;
+    color: #777;
+    font-size: 1rem;
+    line-height: 1.4;
+}
+
+.blog-card-excerpt p {
+    margin: 1rem 0;
+    color: #555;
+    line-height: 1.6;
+}
+
+.blog-card-actions {
+    margin-top: auto;
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+}
+
+.read-more-btn {
+    display: inline-block;
+    padding: 10px 20px;
+    background: var(--nepal-blue);
+    color: white;
+    text-decoration: none;
+    border-radius: 6px;
+    font-weight: 500;
+    transition: background 0.3s ease;
+    align-self: flex-start;
+}
+
+.read-more-btn:hover {
+    background: #002a70;
+}
+
+.mini-share-section {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+}
+
+.share-label {
+    font-size: 0.9rem;
+    font-weight: 500;
+    color: #666;
+}
+
+.mini-share-buttons {
+    display: flex;
+    gap: 0.5rem;
+}
+
+.mini-share-btn {
+    width: 32px;
+    height: 32px;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 1rem;
+    transition: all 0.3s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.mini-share-btn:hover {
+    transform: scale(1.1);
+}
+
+.facebook {
+    background: #1877F2;
+    color: white;
+}
+
+.facebook:hover {
+    background: #166fe5;
+}
+
+.twitter {
+    background: #000000;
+    color: white;
+}
+
+.twitter:hover {
+    background: #1a1a1a;
+}
+
+.linkedin {
+    background: #0077B5;
+    color: white;
+}
+
+.linkedin:hover {
+    background: #005885;
+}
+
+.whatsapp {
+    background: #25D366;
+    color: white;
+}
+
+.whatsapp:hover {
+    background: #1da851;
+}
+
+/* No posts message */
+.no-posts {
+    text-align: center;
+    padding: 4rem;
+    color: #666;
+}
+
+.no-posts i {
+    font-size: 3rem;
+    margin-bottom: 1rem;
+    color: #ccc;
+}
+
+.no-posts h3 {
+    margin-bottom: 1rem;
+    color: var(--nepal-blue);
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+    .blog-container {
+        padding: 15px;
+    }
+
+    .blog-header h1 {
+        font-size: 2rem;
+    }
+
+    .blog-card-content {
+        flex-direction: column !important;
+    }
+
+    .blog-card-text {
+        padding: 1rem;
+    }
+
+    .blog-card-title {
+        font-size: 1.3rem;
+    }
+
+    .blog-card-actions {
+        flex-direction: column;
+        align-items: stretch;
+    }
+
+    .read-more-btn {
+        align-self: stretch;
+        text-align: center;
+    }
+
+    .mini-share-section {
+        justify-content: center;
+        margin-top: 1rem;
+    }
+}
+
+@media (max-width: 480px) {
+    .mini-share-buttons {
+        justify-content: center;
+    }
+}
+</style>
+{% endblock %}
+
+{% block extra_js %}
+<script src="{% static 'js/script.js' %}"></script>
+<script>
+// Quick share functions for blog list cards
+function shareToFacebook(title, url, author) {
+    const text = `Check out this blog post: ${title} by ${author}`;
+    const facebookUrl = `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(url)}&quote=${encodeURIComponent(text)}`;
+    window.open(facebookUrl, '_blank', 'width=600,height=400');
+    trackQuickShare('facebook-list');
+}
+
+function shareToTwitter(title, url) {
+    const tweetText = `📖 ${title} ${url}`;
+    const twitterUrl = `https://twitter.com/intent/tweet?text=${encodeURIComponent(tweetText)}`;
+    window.open(twitterUrl, '_blank', 'width=600,height=400');
+    trackQuickShare('twitter-list');
+}
+
+function shareToLinkedIn(title, url) {
+    const linkedinUrl = `https://www.linkedin.com/sharing/share-offsite/?url=${encodeURIComponent(url)}&title=${encodeURIComponent(title)}`;
+    window.open(linkedinUrl, '_blank', 'width=600,height=400');
+    trackQuickShare('linkedin-list');
+}
+
+function shareToWhatsApp(title, url) {
+    const text = `📖 ${title}\n\nCheck out this blog post: ${url}`;
+    const isMobile = /Android|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+
+    let whatsappUrl;
+    if (isMobile) {
+        whatsappUrl = `whatsapp://send?text=${encodeURIComponent(text)}`;
+    } else {
+        whatsappUrl = `https://wa.me/?text=${encodeURIComponent(text)}`;
+    }
+
+    window.open(whatsappUrl, '_blank', 'width=600,height=400');
+    trackQuickShare('whatsapp-list');
+}
+
+function trackQuickShare(platform) {
+    // Optional: Track shares from list view
+    if (typeof gtag !== 'undefined') {
+        gtag('event', 'share_blog_card', {
+            'event_category': 'social_sharing_list',
+            'event_label': platform
+        });
+    }
+    console.log(`Quick shared blog post via ${platform}`);
+}
+
+// Add click animations to share buttons
+document.addEventListener('DOMContentLoaded', function() {
+    const shareBtns = document.querySelectorAll('.mini-share-btn');
+
+    shareBtns.forEach(btn => {
+        btn.addEventListener('click', function() {
+            btn.style.transform = 'scale(0.95)';
+            setTimeout(() => {
+                btn.style.transform = '';
+            }, 150);
+        });
+    });
+});
+</script>
+{% endblock %}

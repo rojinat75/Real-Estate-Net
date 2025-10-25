@@ -1,0 +1,920 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}{{ post.title }} | Gorkha Real Estate Blog{% endblock %}
+
+{% block meta_description %}Read this insightful article: "{{ post.title }}" by {{ post.author.get_full_name|default:post.author.username }}. {% if post.excerpt %}{{ post.excerpt }}{% else %}{{ post.content|striptags|truncatechars:150 }}{% endif %} Learn more about real estate trends, tips, and market insights in Nepal.{% endblock %}
+
+{% block meta_keywords %}blog, real estate, {{ post.author.get_full_name|default:post.author.username }}, real estate tips, property market, Nepal real estate, real estate trends, real estate insights{% endblock %}
+
+{% block meta_robots %}index, follow, max-snippet:-1, max-image-preview:large, max-video-preview:-1{% endblock %}
+
+{% block og_type %}article{% endblock %}
+{% block og_url %}{{ request.build_absolute_uri }}{% endblock %}
+{% block og_title %}{{ post.title }} - Gorkha Real Estate Blog{% endblock %}
+{% block og_description %}Read this insightful article: "{{ post.title }}" by {{ post.author.get_full_name|default:post.author.username }}. {% if post.excerpt %}{{ post.excerpt }}{% else %}{{ post.content|striptags|truncatechars:200 }}{% endif %}{% endblock %}
+{% block og_image %}{% if post.image %}{{ post.image.url }}{% else %}{% static 'images/logo.jpeg' %}{% endif %}{% endblock %}
+
+{% block twitter_card %}summary_large_image{% endblock %}
+{% block twitter_title %}📖 {{ post.title }}{% endblock %}
+{% block twitter_description %}Read this blog post by {{ post.author.get_full_name|default:post.author.username }}} about real estate trends and insights from Gorkha Real Estate.{% endblock %}
+{% block twitter_image %}{% if post.image %}{{ post.image.url }}{% else %}{% static 'images/logo.jpeg' %}{% endif %}{% endblock %}
+
+{% block content %}
+    <div class="blog-post" style="max-width: 900px; margin: 0 auto; padding: 20px;">
+        <article>
+            <header class="blog-post-header">
+                <h1>{{ post.title }}</h1>
+                <div class="blog-post-meta">
+                    <span class="post-author">
+                        <i class="fas fa-user"></i> {{ post.author.get_full_name|default:post.author.username }}
+                    </span>
+                    <span class="post-date">
+                        <i class="fas fa-calendar"></i> {{ post.published_date|date:"F d, Y" }}
+                    </span>
+                    {% if post.excerpt %}
+                        <div class="post-excerpt">
+                            {{ post.excerpt }}
+                        </div>
+                    {% endif %}
+                </div>
+
+                <!-- Social Share Section -->
+                <div class="blog-share-section">
+                    <div class="share-info">
+                        <span class="share-label">Share this article:</span>
+                    </div>
+                    <div class="share-buttons">
+                        <button class="share-btn share-facebook" onclick="shareToFacebook()" title="Share on Facebook">
+                            <i class="fab fa-facebook-f"></i>
+                        </button>
+                        <button class="share-btn share-twitter" onclick="shareToTwitter()" title="Share on Twitter">
+                            <i class="fab fa-twitter"></i>
+                        </button>
+                        <button class="share-btn share-linkedin" onclick="shareToLinkedIn()" title="Share on LinkedIn">
+                            <i class="fab fa-linkedin-in"></i>
+                        </button>
+                        <button class="share-btn share-whatsapp" onclick="shareToWhatsApp()" title="Share on WhatsApp">
+                            <i class="fab fa-whatsapp"></i>
+                        </button>
+                        <button class="share-btn share-email" onclick="shareViaEmail()" title="Share via Email">
+                            <i class="fas fa-envelope"></i>
+                        </button>
+                        <button class="share-btn share-link" onclick="copyShareLink()" title="Copy Link">
+                            <i class="fas fa-link"></i>
+                        </button>
+                        <button class="share-btn share-more" onclick="showShareModal(event)" title="More sharing options">
+                            <i class="fas fa-share-alt"></i>
+                        </button>
+                    </div>
+                </div>
+            </header>
+
+            {% if post.image %}
+                <div class="blog-post-image">
+                    <img src="{{ post.image.url }}" alt="{{ post.title }}" loading="lazy">
+                </div>
+            {% endif %}
+
+            <div class="blog-post-content">
+                {{ post.content|linebreaksbr }}
+            </div>
+        </article>
+
+        <!-- Back to Blog Link -->
+        <div class="blog-post-footer">
+            <a href="{% url 'blog:blog_list' %}" class="back-to-blog-btn">
+                <i class="fas fa-arrow-left"></i> Back to Blog
+            </a>
+        </div>
+
+        <!-- Share Modal (same as property modal but adapted for blog posts) -->
+        <div id="shareModal" class="share-modal" style="display: none;">
+            <div class="share-modal-content">
+                <div class="share-modal-header">
+                    <h3><i class="fas fa-share-alt"></i> Share This Blog Post</h3>
+                    <span class="share-modal-close" onclick="closeShareModal()">&times;</span>
+                </div>
+
+                <div class="property-share-info">
+                    <div class="property-share-image">
+                        {% if post.image %}
+                            <img src="{{ post.image.url }}" alt="{{ post.title }}" loading="lazy">
+                        {% else %}
+                            <div class="no-share-image">📄</div>
+                        {% endif %}
+                    </div>
+                    <div class="property-share-details">
+                        <h4>{{ post.title }}</h4>
+                        <p class="property-share-price">By {{ post.author.get_full_name|default:post.author.username }}</p>
+                        <p class="property-share-location">Published {{ post.published_date|date:"F d, Y" }}</p>
+                    </div>
+                </div>
+
+                <div class="share-platforms">
+                    <div class="share-platform" onclick="shareToWhatsApp()" title="Share on WhatsApp">
+                        <i class="fab fa-whatsapp"></i>
+                        <span>WhatsApp</span>
+                    </div>
+                    <div class="share-platform" onclick="shareToFacebook()" title="Share on Facebook">
+                        <i class="fab fa-facebook-f"></i>
+                        <span>Facebook</span>
+                    </div>
+                    <div class="share-platform" onclick="shareToTwitter()" title="Share on Twitter/X">
+                        <i class="fab fa-twitter"></i>
+                        <span>Twitter</span>
+                    </div>
+                    <div class="share-platform" onclick="shareToLinkedIn()" title="Share on LinkedIn">
+                        <i class="fab fa-linkedin-in"></i>
+                        <span>LinkedIn</span>
+                    </div>
+                    <div class="share-platform" onclick="shareViaEmail()" title="Share via Email">
+                        <i class="fas fa-envelope"></i>
+                        <span>Email</span>
+                    </div>
+                    <div class="share-platform" onclick="shareViaMessenger()" title="Share via Messenger">
+                        <i class="fab fa-facebook-messenger"></i>
+                        <span>Messenger</span>
+                    </div>
+                </div>
+
+                <div class="share-link-section">
+                    <h4><i class="fas fa-link"></i> Or copy the link:</h4>
+                    <div class="share-link-input">
+                        <input type="text" id="propertyShareUrl" value="{{ request.build_absolute_uri }}" readonly>
+                        <button onclick="copyShareLink()" class="copy-link-btn" title="Copy link">
+                            <i class="fas fa-copy"></i> Copy
+                        </button>
+                    </div>
+                </div>
+            </div>
+            <div class="share-modal-overlay" onclick="closeShareModal()"></div>
+        </div>
+    </div>
+{% endblock %}
+
+{% block extra_css %}
+<style>
+/* Blog Post Styles */
+.blog-post-header {
+    margin-bottom: 2rem;
+    padding-bottom: 1rem;
+    border-bottom: 2px solid #f0f0f0;
+}
+
+.blog-post-header h1 {
+    margin: 0 0 1rem 0;
+    font-size: 2.2rem;
+    color: var(--nepal-blue);
+    line-height: 1.2;
+    font-weight: 700;
+}
+
+.blog-post-meta {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 1rem;
+    align-items: center;
+    margin-bottom: 1rem;
+    font-size: 0.9rem;
+    color: #666;
+}
+
+.post-author, .post-date {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.post-author i, .post-date i {
+    color: var(--nepal-crimson);
+}
+
+.post-excerpt {
+    flex-basis: 100%;
+    margin-top: 0.5rem;
+    font-style: italic;
+    color: #777;
+    font-size: 1.1rem;
+    line-height: 1.4;
+}
+
+.blog-share-section {
+    margin-top: 1.5rem;
+    padding: 1rem;
+    background: linear-gradient(135deg, #f8f9fa, #e9ecef);
+    border-radius: 10px;
+    border: 1px solid #dee2e6;
+}
+
+.share-info {
+    margin-bottom: 1rem;
+}
+
+.share-label {
+    font-weight: 600;
+    color: var(--nepal-blue);
+    font-size: 1rem;
+}
+
+.share-buttons {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+}
+
+.share-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 40px;
+    height: 40px;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 1.2rem;
+    transition: all 0.3s ease;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.share-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(0,0,0,0.15);
+}
+
+.share-facebook {
+    background: #1877F2;
+    color: white;
+}
+
+.share-facebook:hover {
+    background: #166fe5;
+}
+
+.share-twitter {
+    background: #000000;
+    color: white;
+}
+
+.share-twitter:hover {
+    background: #1a1a1a;
+}
+
+.share-linkedin {
+    background: #0077B5;
+    color: white;
+}
+
+.share-linkedin:hover {
+    background: #005885;
+}
+
+.share-whatsapp {
+    background: #25D366;
+    color: white;
+}
+
+.share-whatsapp:hover {
+    background: #1da851;
+}
+
+.share-email {
+    background: #EA4335;
+    color: white;
+}
+
+.share-email:hover {
+    background: #d33b2c;
+}
+
+.share-link {
+    background: var(--nepal-blue);
+    color: white;
+}
+
+.share-link:hover {
+    background: #002a70;
+}
+
+.share-more {
+    background: #6c757d;
+    color: white;
+}
+
+.share-more:hover {
+    background: #545b62;
+}
+
+.blog-post-image {
+    margin: 2rem 0;
+    border-radius: 10px;
+    overflow: hidden;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+}
+
+.blog-post-image img {
+    width: 100%;
+    height: auto;
+    display: block;
+}
+
+.blog-post-content {
+    margin: 2rem 0;
+    line-height: 1.8;
+    font-size: 1.1rem;
+    color: #333;
+}
+
+.blog-post-content p {
+    margin-bottom: 1.5rem;
+}
+
+.blog-post-footer {
+    margin-top: 3rem;
+    padding: 2rem 0;
+    border-top: 1px solid #e9ecef;
+    text-align: center;
+}
+
+.back-to-blog-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 12px 24px;
+    background: var(--nepal-blue);
+    color: white;
+    text-decoration: none;
+    border-radius: 6px;
+    font-weight: 500;
+    transition: background 0.3s ease;
+}
+
+.back-to-blog-btn:hover {
+    background: #002a70;
+    color: white;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+    .blog-post {
+        padding: 15px;
+    }
+
+    .blog-post-header h1 {
+        font-size: 1.8rem;
+    }
+
+    .share-buttons {
+        justify-content: center;
+    }
+
+    .share-btn {
+        width: 35px;
+        height: 35px;
+        font-size: 1rem;
+    }
+
+    .blog-share-section {
+        padding: 0.8rem;
+    }
+
+    .blog-post-content {
+        font-size: 1rem;
+    }
+}
+
+/* Reuse share modal styles from property template */
+.share-modal {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: 10000;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.share-modal-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.7);
+    backdrop-filter: blur(5px);
+}
+
+.share-modal-content {
+    position: relative;
+    background: white;
+    border-radius: 15px;
+    width: 90%;
+    max-width: 500px;
+    max-height: 90vh;
+    overflow-y: auto;
+    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);
+    animation: slideIn 0.3s ease-out;
+}
+
+@keyframes slideIn {
+    from {
+        transform: scale(0.9) translateY(-20px);
+        opacity: 0;
+    }
+    to {
+        transform: scale(1) translateY(0);
+        opacity: 1;
+    }
+}
+
+.share-modal-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 20px 25px;
+    border-bottom: 2px solid #f0f0f0;
+    background: linear-gradient(135deg, #f8f9fa, #e9ecef);
+    border-radius: 15px 15px 0 0;
+}
+
+.share-modal-header h3 {
+    margin: 0;
+    color: var(--nepal-blue);
+    font-size: 1.4em;
+    font-weight: 700;
+}
+
+.share-modal-header i {
+    margin-right: 10px;
+    color: var(--nepal-blue);
+}
+
+.share-modal-close {
+    font-size: 2em;
+    color: #666;
+    cursor: pointer;
+    padding: 5px;
+    line-height: 1;
+    transition: color 0.3s ease;
+}
+
+.share-modal-close:hover {
+    color: var(--nepal-crimson);
+}
+
+.property-share-info {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    padding: 20px 25px;
+    border-bottom: 1px solid #f0f0f0;
+    background: #f8f9fa;
+}
+
+.property-share-image {
+    flex-shrink: 0;
+}
+
+.property-share-image img {
+    width: 70px;
+    height: 70px;
+    object-fit: cover;
+    border-radius: 8px;
+    border: 2px solid #ddd;
+}
+
+.no-share-image {
+    width: 70px;
+    height: 70px;
+    background: linear-gradient(135deg, var(--nepal-blue), var(--nepal-crimson));
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 2em;
+    border-radius: 8px;
+    border: 2px solid #ddd;
+}
+
+.property-share-details {
+    flex: 1;
+}
+
+.property-share-details h4 {
+    margin: 0 0 8px 0;
+    color: var(--nepal-blue);
+    font-size: 1.1em;
+    font-weight: 600;
+    line-height: 1.3;
+}
+
+.property-share-price {
+    margin: 5px 0;
+    font-size: 1.1em;
+    font-weight: 700;
+    color: var(--nepal-crimson);
+}
+
+.property-share-location {
+    margin: 5px 0;
+    color: #666;
+    font-size: 0.9em;
+}
+
+.share-platforms {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+    gap: 15px;
+    padding: 25px;
+}
+
+.share-platform {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 8px;
+    padding: 15px 10px;
+    border: 2px solid #e9ecef;
+    border-radius: 10px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    background: white;
+}
+
+.share-platform:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+    border-color: var(--nepal-blue);
+}
+
+.share-platform:active {
+    transform: translateY(-1px);
+}
+
+.share-platform i {
+    font-size: 2em;
+    margin-bottom: 5px;
+}
+
+.share-platform .fab.fa-whatsapp {
+    color: #25D366;
+}
+
+.share-platform .fab.fa-facebook-f {
+    color: #1877F2;
+}
+
+.share-platform .fab.fa-twitter {
+    color: #000000;
+}
+
+.share-platform .fab.fa-linkedin-in {
+    color: #0077B5;
+}
+
+.share-platform .fas.fa-envelope {
+    color: #EA4335;
+}
+
+.share-platform .fab.fa-facebook-messenger {
+    color: #448AFF;
+}
+
+.share-platform span {
+    font-size: 0.9em;
+    font-weight: 600;
+    color: #333;
+    text-align: center;
+}
+
+.share-link-section {
+    padding: 20px 25px;
+    border-top: 1px solid #f0f0f0;
+}
+
+.share-link-section h4 {
+    margin: 0 0 15px 0;
+    color: var(--nepal-blue);
+    font-size: 1.1em;
+}
+
+.share-link-section i {
+    margin-right: 8px;
+}
+
+.share-link-input {
+    display: flex;
+    gap: 10px;
+}
+
+.share-link-input input {
+    flex: 1;
+    padding: 12px;
+    border: 2px solid #e9ecef;
+    border-radius: 8px;
+    font-size: 0.9em;
+    color: #333;
+    background: #f8f9fa;
+}
+
+.share-link-input .copy-link-btn {
+    padding: 12px 20px;
+    background: var(--nepal-blue);
+    color: white;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    font-weight: 600;
+    transition: background 0.3s ease;
+    white-space: nowrap;
+}
+
+.share-link-input .copy-link-btn:hover {
+    background: #002a70;
+}
+
+.share-link-input .copy-link-btn i {
+    margin-right: 5px;
+}
+
+/* Responsive adjustments for share modal */
+@media (max-width: 600px) {
+    .share-modal-content {
+        width: 95%;
+        max-height: 95vh;
+    }
+
+    .share-modal-header {
+        padding: 15px 20px;
+    }
+
+    .property-share-info {
+        padding: 15px 20px;
+        flex-direction: column;
+        text-align: center;
+    }
+
+    .share-platforms {
+        grid-template-columns: repeat(3, 1fr);
+        padding: 20px 15px;
+        gap: 12px;
+    }
+
+    .share-platform {
+        padding: 12px 8px;
+    }
+
+    .share-platform i {
+        font-size: 1.8em;
+    }
+
+    .share-link-section {
+        padding: 15px 20px;
+    }
+
+    .share-link-input {
+        flex-direction: column;
+    }
+}
+</style>
+{% endblock %}
+
+{% block extra_js %}
+<script src="{% static 'js/script.js' %}"></script>
+<script>
+// Share Modal Functions for Blog Posts
+function showShareModal(event) {
+    event.preventDefault();
+    const modal = document.getElementById('shareModal');
+    modal.style.display = 'flex';
+    document.body.style.overflow = 'hidden'; // Prevent background scrolling
+
+    // Track share modal open (optional analytics)
+    if (typeof gtag !== 'undefined') {
+        gtag('event', 'share_modal_opened', {
+            'event_category': 'engagement',
+            'event_label': '{{ post.title }}'
+        });
+    }
+}
+
+function closeShareModal() {
+    const modal = document.getElementById('shareModal');
+    modal.style.display = 'none';
+    document.body.style.overflow = 'auto'; // Restore scrolling
+}
+
+// Get blog post share data for consistent sharing across platforms
+function getShareData() {
+    const postTitle = "{{ post.title|escapejs }}";
+    const authorName = "{{ post.author.get_full_name|default:post.author.username|escapejs }}";
+    const publishDate = "{{ post.published_date|date:'F d, Y'|escapejs }}";
+    const currentUrl = "{{ request.build_absolute_uri }}";
+    {% if post.excerpt %}
+        const excerpt = "{{ post.excerpt|truncatechars:150|escapejs }}";
+        const text = `📖 ${postTitle} by ${authorName}\n\n${excerpt}\n\nRead more: ${currentUrl}`;
+    {% else %}
+        const text = `📖 ${postTitle} by ${authorName}\n\nPublished on ${publishDate}\n\nRead more: ${currentUrl}`;
+    {% endif %}
+
+    return {
+        title: postTitle,
+        author: authorName,
+        date: publishDate,
+        url: currentUrl,
+        text: text
+    };
+}
+
+// WhatsApp Sharing for Blog Posts
+function shareToWhatsApp() {
+    const data = getShareData();
+
+    // Check if mobile or desktop
+    const isMobile = /Android|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+
+    let whatsappUrl;
+    if (isMobile) {
+        // Direct app (mobile)
+        whatsappUrl = `whatsapp://send?text=${encodeURIComponent(data.text)}`;
+    } else {
+        // Web version (desktop)
+        whatsappUrl = `https://wa.me/?text=${encodeURIComponent(data.text)}`;
+    }
+
+    window.open(whatsappUrl, '_blank', 'width=600,height=400');
+
+    // Track share
+    trackShare('whatsapp');
+}
+
+// Facebook Sharing for Blog Posts
+function shareToFacebook() {
+    const data = getShareData();
+    const facebookUrl = `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(data.url)}&quote=${encodeURIComponent('Check out this blog post: ' + data.title + ' by ' + data.author)}`;
+
+    window.open(facebookUrl, '_blank', 'width=600,height=400');
+    trackShare('facebook');
+}
+
+// Twitter/X Sharing for Blog Posts
+function shareToTwitter() {
+    const data = getShareData();
+    const tweetText = `📖 ${data.title} by ${data.author} ${data.url}`;
+
+    // Twitter intent URL
+    const twitterUrl = `https://twitter.com/intent/tweet?text=${encodeURIComponent(tweetText)}`;
+
+    window.open(twitterUrl, '_blank', 'width=600,height=400');
+    trackShare('twitter');
+}
+
+// LinkedIn Sharing for Blog Posts
+function shareToLinkedIn() {
+    const data = getShareData();
+    const linkedinUrl = `https://www.linkedin.com/sharing/share-offsite/?url=${encodeURIComponent(data.url)}&title=${encodeURIComponent(data.title)}&summary=${encodeURIComponent('Blog post by ' + data.author + ': ' + (data.excerpt || 'Read the full article'))}`;
+
+    window.open(linkedinUrl, '_blank', 'width=600,height=400');
+    trackShare('linkedin');
+}
+
+// Email Sharing for Blog Posts
+function shareViaEmail() {
+    const data = getShareData();
+    const subject = encodeURIComponent(`Blog Post: ${data.title}`);
+    const body = encodeURIComponent(`Hi,
+
+I found this interesting blog post and thought you might like to read it:
+
+"${data.title}"
+By ${data.author}
+Published on ${data.date}
+
+${data.excerpt || 'Click the link below to read the full article:'}
+
+${data.url}
+
+Best regards`);
+
+    const emailUrl = `mailto:?subject=${subject}&body=${body}`;
+    window.open(emailUrl);
+    trackShare('email');
+}
+
+// Messenger Sharing for Blog Posts
+function shareViaMessenger() {
+    const data = getShareData();
+    // Using Facebook's Messenger sharing
+    const messengerUrl = `fb-messenger://share/?link=${encodeURIComponent(data.url)}&app_id=123456789`;
+
+    // Fallback to web version if app isn't available
+    const webMessengerUrl = `https://www.facebook.com/dialog/send?link=${encodeURIComponent(data.url)}&app_id=123456789&redirect_uri=${encodeURIComponent(window.location.href)}`;
+    window.open(webMessengerUrl, '_blank', 'width=600,height=400');
+
+    trackShare('messenger');
+}
+
+// Copy Link to Clipboard for Blog Posts
+function copyShareLink() {
+    const linkInput = document.getElementById('propertyShareUrl');
+
+    // Select the URL
+    linkInput.select();
+    linkInput.setSelectionRange(0, 99999); // For mobile devices
+
+    // Copy to clipboard
+    try {
+        document.execCommand('copy');
+        // Show success feedback
+        const copyBtn = document.querySelector('.copy-link-btn');
+        const originalText = copyBtn.innerHTML;
+        copyBtn.innerHTML = '<i class="fas fa-check"></i> Copied!';
+        copyBtn.style.background = '#28a745';
+
+        setTimeout(() => {
+            copyBtn.innerHTML = originalText;
+            copyBtn.style.background = '';
+        }, 2000);
+
+        trackShare('copy-link');
+    } catch (err) {
+        console.error('Failed to copy: ', err);
+        // Fallback for older browsers
+        alert('Link copied: ' + linkInput.value);
+    }
+}
+
+// Track share events for analytics (adapted for blog posts)
+function trackShare(platform) {
+    // Track with Google Analytics (if available)
+    if (typeof gtag !== 'undefined') {
+        gtag('event', 'share_blog_post', {
+            'event_category': 'social_sharing',
+            'event_label': platform,
+            'value': '{{ post.pk }}'
+        });
+    }
+
+    // Track with our backend analytics
+    trackShareBackend(platform, '{{ post.pk }}', 'blog_post');
+
+    // Close modal after sharing on mobile devices to improve UX
+    if (window.innerWidth <= 768) {
+        setTimeout(closeShareModal, 1000);
+    }
+
+    // Show success message (optional)
+    console.log(`Shared blog post "${data.title}" via ${platform}`);
+}
+
+// Track share events in our backend (for blog posts)
+function trackShareBackend(platform, contentId, contentType) {
+    // Send tracking data to our backend
+    fetch('{% url "analytics:track_social_share" %}', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'X-CSRFToken': '{{ csrf_token }}'
+        },
+        body: JSON.stringify({
+            platform: platform,
+            content_type: contentType,
+            content_id: parseInt(contentId),
+            page_title: '{{ post.title }}',
+            url: window.location.href,
+            metadata: {
+                user_agent: navigator.userAgent,
+                screen_resolution: screen.width + 'x' + screen.height,
+                referrer: document.referrer,
+                author: '{{ post.author.get_full_name|default:post.author.username|escapejs }}'
+            }
+        })
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            console.log('Blog share tracked successfully:', data.message);
+        } else {
+            console.warn('Failed to track blog share:', data.message);
+        }
+    })
+    .catch(error => {
+        console.error('Error tracking blog share:', error);
+    });
+}
+
+// Close modal on Escape key
+document.addEventListener('keydown', function(event) {
+    if (event.key === 'Escape') {
+        closeShareModal();
+    }
+});
+
+// Initialize: close modal if user clicks outside
+document.addEventListener('DOMContentLoaded', function() {
+    // The modal overlay click is already handled in HTML
+    console.log('Blog post share modal initialized');
+});
+</script>
+{% endblock %}

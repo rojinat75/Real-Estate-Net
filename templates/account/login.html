@@ -1,0 +1,370 @@
+{% extends 'base.html' %}
+{% load static %}
+{% load socialaccount %}
+
+{% block title %}Login - Real Estate Net{% endblock %}
+
+{% block extra_css %}
+<style>
+/* Clean, professional login stylesheet */
+.login-container {
+    min-height: 100vh;
+    background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+}
+
+.login-card {
+    background: white;
+    border-radius: 12px;
+    box-shadow: 0 8px 32px rgba(0,0,0,0.1);
+    width: 100%;
+    max-width: 400px;
+    padding: 40px 30px;
+}
+
+.login-header {
+    text-align: center;
+    margin-bottom: 30px;
+}
+
+.login-header h1 {
+    color: #0033A0;
+    margin: 0 0 10px 0;
+    font-size: 2.2em;
+    font-weight: 700;
+}
+
+.login-header p {
+    color: #666;
+    margin: 0;
+    font-size: 1.1em;
+}
+
+.login-form {
+    margin-bottom: 25px;
+}
+
+.form-group {
+    margin-bottom: 20px;
+}
+
+.form-group label {
+    display: block;
+    color: #0033A0;
+    font-weight: 600;
+    margin-bottom: 8px;
+    font-size: 0.95em;
+}
+
+.form-group input {
+    width: 100%;
+    padding: 12px 15px;
+    border: 2px solid #e9ecef;
+    border-radius: 8px;
+    font-size: 1em;
+    transition: border-color 0.3s ease;
+    box-sizing: border-box;
+}
+
+.form-group input:focus {
+    outline: none;
+    border-color: #0033A0;
+    box-shadow: 0 0 0 3px rgba(0, 51, 160, 0.1);
+}
+
+.login-btn {
+    width: 100%;
+    background: linear-gradient(135deg, #0033A0, #DC143C);
+    color: white;
+    border: none;
+    padding: 15px;
+    border-radius: 8px;
+    font-size: 1em;
+    font-weight: 600;
+    cursor: pointer;
+    transition: transform 0.2s ease;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.login-btn:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(0,51,160,0.3);
+}
+
+.login-btn:active {
+    transform: translateY(0);
+}
+
+.divider {
+    text-align: center;
+    margin: 25px 0;
+    position: relative;
+    color: #666;
+    font-size: 0.9em;
+}
+
+.divider::before {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 0;
+    right: 0;
+    height: 1px;
+    background: #ddd;
+    z-index: 1;
+}
+
+.divider span {
+    background: white;
+    padding: 0 15px;
+    position: relative;
+    z-index: 2;
+}
+
+.social-login {
+    margin-bottom: 25px;
+    text-align: center;
+}
+
+.social-login h3 {
+    color: #0033A0;
+    margin: 0 0 20px 0;
+    font-size: 1.1em;
+}
+
+.social-login p {
+    font-size: 0.9em;
+    color: #666;
+    margin-bottom: 15px;
+    padding: 15px;
+    background: #f8f9fa;
+    border-radius: 6px;
+}
+
+.social-login i {
+    color: #0033A0;
+    margin-right: 5px;
+}
+
+.register-link {
+    text-align: center;
+    margin-top: 20px;
+    padding: 20px;
+    background: #f8f9fa;
+    border-radius: 8px;
+}
+
+.register-link p {
+    margin: 0 0 12px 0;
+    color: #333;
+    font-size: 0.95em;
+}
+
+.register-link a {
+    color: #0033A0;
+    text-decoration: none;
+    font-weight: 600;
+    transition: color 0.2s ease;
+}
+
+.register-link a:hover {
+    color: #DC143C;
+}
+
+@media (max-width: 480px) {
+    .login-container {
+        padding: 10px;
+    }
+
+    .login-card {
+        padding: 30px 20px;
+    }
+
+    .login-header h1 {
+        font-size: 2em;
+    }
+}
+
+
+
+
+
+/* Horizontal Social Icons Layout */
+.social-login-horizontal {
+    text-align: center;
+    margin-bottom: 25px;
+}
+
+.social-login-text {
+    margin: 0 0 15px 0;
+    color: #666;
+    font-size: 0.9em;
+    font-weight: 500;
+}
+
+.social-icons-horizontal {
+    display: flex;
+    justify-content: center;
+    gap: 15px;
+    align-items: center;
+}
+
+.social-icon-link {
+    text-decoration: none;
+    transition: transform 0.2s ease;
+}
+
+.social-icon-link:hover {
+    transform: translateY(-2px);
+}
+
+.social-icon {
+    width: 44px;
+    height: 44px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border: 2px solid #e1e5e9;
+    background: #ffffff;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+    transition: all 0.3s ease;
+    position: relative;
+    overflow: hidden;
+}
+
+.social-icon:hover {
+    transform: scale(1.05);
+    box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+}
+
+.google-icon:hover {
+    border-color: #4285f4;
+    box-shadow: 0 4px 12px rgba(66, 133, 244, 0.3);
+}
+
+.facebook-icon:hover {
+    border-color: #1877f2;
+    box-shadow: 0 4px 12px rgba(24, 119, 242, 0.3);
+}
+
+.linkedin-icon:hover {
+    border-color: #0077b5;
+    box-shadow: 0 4px 12px rgba(0, 119, 181, 0.3);
+}
+
+.twitter-icon:hover {
+    border-color: #1da1f2;
+    box-shadow: 0 4px 12px rgba(29, 161, 242, 0.3);
+}
+
+/* Responsive social icons */
+@media (max-width: 480px) {
+    .social-icons-horizontal {
+        gap: 12px;
+    }
+
+    .social-icon {
+        width: 40px;
+        height: 40px;
+    }
+
+    .social-icon img {
+        width: 22px !important;
+        height: 22px !important;
+    }
+}
+
+/* Brand colors */
+.brand-blue { color: #0033A0; }
+.brand-red { color: #DC143C; }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="login-container">
+    <div class="login-card">
+    <div class="login-header">
+        <h1>🔑 Welcome Back</h1>
+        <p>Sign in to your Real Estate Net account</p>
+    </div>
+
+        <!-- Social Login Buttons - Horizontal Icons -->
+        <div class="social-login-horizontal">
+            <p class="social-login-text">Login with</p>
+            <div class="social-icons-horizontal">
+                <a href="{% provider_login_url 'google' %}" class="social-icon-link" title="Login with Google" aria-label="Login with Google">
+                    <div class="social-icon google-icon">
+                        <img src="{% static 'images/google.png' %}" alt="Google" style="width: 24px; height: 24px;">
+                    </div>
+                </a>
+                <a href="{% provider_login_url 'facebook' %}" class="social-icon-link" title="Login with Facebook" aria-label="Login with Facebook">
+                    <div class="social-icon facebook-icon">
+                        <img src="{% static 'images/facebook.png' %}" alt="Facebook" style="width: 24px; height: 24px;">
+                    </div>
+                </a>
+                <a href="{% provider_login_url 'linkedin_oauth2' %}" class="social-icon-link" title="Login with LinkedIn" aria-label="Login with LinkedIn">
+                    <div class="social-icon linkedin-icon">
+                        <img src="{% static 'images/linkedin.png' %}" alt="LinkedIn" style="width: 24px; height: 24px;">
+                    </div>
+                </a>
+                <a href="{% provider_login_url 'twitter' %}" class="social-icon-link" title="Login with Twitter" aria-label="Login with Twitter">
+                    <div class="social-icon twitter-icon">
+                        <img src="{% static 'images/twitter.png' %}" alt="Twitter" style="width: 24px; height: 24px;">
+                    </div>
+                </a>
+            </div>
+        </div>
+
+        <div class="divider">
+            <span>Or continue with email</span>
+        </div>
+
+        <!-- Regular Login Form -->
+        <form method="post" class="login-form">
+            {% csrf_token %}
+
+            <div class="form-group">
+                <label for="{{ form.login.id_for_label }}">Email</label>
+                {{ form.login }}
+                {% if form.login.errors %}
+                    {% for error in form.login.errors %}
+                        <div style="color: #DC143C; font-size: 0.9em; margin-top: 5px;">{{ error }}</div>
+                    {% endfor %}
+                {% endif %}
+            </div>
+
+            <div class="form-group">
+                <label for="{{ form.password.id_for_label }}">Password</label>
+                {{ form.password }}
+                {% if form.password.errors %}
+                    {% for error in form.password.errors %}
+                        <div style="color: #DC143C; font-size: 0.9em; margin-top: 5px;">{{ error }}</div>
+                    {% endfor %}
+                {% endif %}
+            </div>
+
+            <button type="submit" class="login-btn">
+                🔑 Sign In
+            </button>
+        </form>
+
+        <!-- Register Link -->
+        <div class="register-link">
+            <p>New to Real Estate Net?</p>
+            <a href="{% url 'account_signup' %}">Create your account</a>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+// Social login is now functional!
+console.log('Real Estate Net - Social Login Ready');
+</script>
+{% endblock %}

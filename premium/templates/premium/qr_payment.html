@@ -1,0 +1,531 @@
+{% extends 'base.html' %}
+{% load static %}
+{% load humanize %}
+
+{% block title %}QR Payment - Gorkha Real Estate{% endblock %}
+
+{% block extra_css %}
+<style>
+.qr-payment-container {
+    max-width: 900px;
+    margin: 0 auto;
+    padding: 40px 20px;
+}
+
+.qr-header {
+    text-align: center;
+    margin-bottom: 50px;
+}
+
+.qr-header h1 {
+    color: var(--nepal-blue);
+    font-size: 3em;
+    margin-bottom: 20px;
+    text-shadow: 2px 2px 4px rgba(0,0,0,0.1);
+}
+
+.qr-header p {
+    color: #666;
+    font-size: 1.2em;
+    max-width: 600px;
+    margin: 0 auto;
+}
+
+.payment-card {
+    background: white;
+    border-radius: 15px;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+    overflow: hidden;
+    margin-bottom: 30px;
+}
+
+.payment-info {
+    background: linear-gradient(135deg, var(--nepal-blue), var(--nepal-crimson));
+    color: white;
+    padding: 30px;
+    text-align: center;
+}
+
+.payment-info h2 {
+    margin: 0 0 10px 0;
+    font-size: 1.8em;
+}
+
+.payment-info p {
+    margin: 0;
+    opacity: 0.9;
+}
+
+.payment-details {
+    padding: 30px;
+}
+
+.detail-section {
+    margin-bottom: 25px;
+    padding: 20px;
+    background: #f8f9fa;
+    border-radius: 10px;
+    border-left: 4px solid var(--nepal-blue);
+}
+
+.detail-section h3 {
+    color: var(--nepal-blue);
+    margin-bottom: 15px;
+    font-size: 1.3em;
+}
+
+.detail-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 15px;
+}
+
+.detail-item {
+    display: flex;
+    justify-content: space-between;
+    padding: 10px 0;
+    border-bottom: 1px solid #dee2e6;
+}
+
+.detail-item:last-child {
+    border-bottom: none;
+}
+
+.detail-label {
+    font-weight: 600;
+    color: #495057;
+}
+
+.detail-value {
+    color: var(--nepal-crimson);
+    font-weight: 700;
+}
+
+.qr-section {
+    background: white;
+    padding: 30px;
+    border-radius: 10px;
+    text-align: center;
+    margin-top: 20px;
+}
+
+.qr-code-container {
+    display: inline-block;
+    padding: 20px;
+    background: white;
+    border: 3px solid var(--nepal-blue);
+    border-radius: 15px;
+    margin: 20px 0;
+    position: relative;
+}
+
+.qr-image {
+    width: 200px;
+    height: 200px;
+    border-radius: 10px;
+    display: block;
+    margin: 0 auto;
+}
+
+.qr-overlay {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    background: rgba(0, 51, 160, 0.9);
+    color: white;
+    padding: 10px 15px;
+    border-radius: 8px;
+    text-align: center;
+    min-width: 120px;
+}
+
+.qr-info {
+    font-size: 0.8em;
+}
+
+.payment-amount {
+    font-size: 1.2em;
+    font-weight: 900;
+    margin-bottom: 5px;
+}
+
+.payment-id {
+    font-size: 0.7em;
+    opacity: 0.9;
+}
+
+.payment-instructions {
+    background: #e3f2fd;
+    padding: 25px;
+    border-radius: 10px;
+    margin: 20px 0;
+    border-left: 4px solid var(--nepal-blue);
+}
+
+.instructions-title {
+    color: var(--nepal-blue);
+    margin-bottom: 15px;
+    font-size: 1.3em;
+}
+
+.instructions-list {
+    list-style: none;
+    padding: 0;
+}
+
+.instructions-list li {
+    padding: 8px 0;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.instructions-list li i {
+    color: var(--nepal-blue);
+    font-size: 1.2em;
+    width: 20px;
+}
+
+.payment-actions {
+    display: flex;
+    gap: 15px;
+    justify-content: center;
+    flex-wrap: wrap;
+    margin-top: 30px;
+}
+
+.action-btn {
+    padding: 15px 30px;
+    border: none;
+    border-radius: 25px;
+    font-size: 1.1em;
+    font-weight: 700;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    text-decoration: none;
+    display: inline-block;
+    min-width: 150px;
+}
+
+.btn-primary {
+    background: linear-gradient(135deg, var(--nepal-blue), var(--nepal-crimson));
+    color: white;
+}
+
+.btn-primary:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 10px 20px rgba(0,51,160,0.3);
+}
+
+.btn-success {
+    background: #28a745;
+    color: white;
+}
+
+.btn-success:hover {
+    background: #218838;
+    transform: translateY(-2px);
+}
+
+.btn-warning {
+    background: #ffc107;
+    color: #212529;
+}
+
+.btn-warning:hover {
+    background: #e0a800;
+    transform: translateY(-2px);
+}
+
+.payment-receipt {
+    background: white;
+    border: 2px solid #dee2e6;
+    border-radius: 10px;
+    padding: 20px;
+    margin-top: 20px;
+}
+
+.receipt-header {
+    text-align: center;
+    border-bottom: 2px solid #dee2e6;
+    padding-bottom: 20px;
+    margin-bottom: 20px;
+}
+
+.receipt-title {
+    color: var(--nepal-blue);
+    font-size: 1.8em;
+    margin-bottom: 10px;
+}
+
+.receipt-id {
+    color: #666;
+    font-size: 1.1em;
+}
+
+.receipt-body {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 20px;
+}
+
+.receipt-section h4 {
+    color: var(--nepal-blue);
+    margin-bottom: 15px;
+}
+
+.receipt-item {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 8px;
+}
+
+.receipt-label {
+    color: #666;
+}
+
+.receipt-value {
+    font-weight: 600;
+    color: #495057;
+}
+
+@media (max-width: 768px) {
+    .qr-header h1 {
+        font-size: 2.2em;
+    }
+
+    .detail-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .payment-actions {
+        flex-direction: column;
+        align-items: center;
+    }
+
+    .receipt-body {
+        grid-template-columns: 1fr;
+    }
+}
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="qr-payment-container">
+    <div class="qr-header">
+        <h1>📱 QR Code Payment</h1>
+        <p>Generate a QR code with your payment details for easy payment processing</p>
+    </div>
+
+    <div class="payment-card">
+        <!-- Property Information -->
+        <div class="payment-info">
+            <h2>{{ property.title }}</h2>
+            <p>{{ property.city }}, {{ property.state }} • NPR {{ property.price|intcomma }}</p>
+        </div>
+
+        <!-- Payment Details -->
+        <div class="payment-details">
+            <div class="detail-section">
+                <h3>💳 Payment Information</h3>
+                <div class="detail-grid">
+                    <div class="detail-item">
+                        <span class="detail-label">Plan Type:</span>
+                        <span class="detail-value">{{ plan_type|title }}</span>
+                    </div>
+                    <div class="detail-item">
+                        <span class="detail-label">Amount to Pay:</span>
+                        <span class="detail-value">NPR {{ price|intcomma }}</span>
+                    </div>
+                    <div class="detail-item">
+                        <span class="detail-label">Duration:</span>
+                        <span class="detail-value">{{ duration_days }} days</span>
+                    </div>
+                    <div class="detail-item">
+                        <span class="detail-label">Payment ID:</span>
+                        <span class="detail-value" id="payment_id">{{ payment_id }}</span>
+                    </div>
+                    <div class="detail-item">
+                        <span class="detail-label">User:</span>
+                        <span class="detail-value">{{ user.username }}</span>
+                    </div>
+                    <div class="detail-item">
+                        <span class="detail-label">Date:</span>
+                        <span class="detail-value">{{ payment_date|date:"M d, Y H:i" }}</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- QR Code Section -->
+        <div class="qr-section">
+            <h3 style="color: var(--nepal-blue); margin-bottom: 20px;">📱 Your Payment QR Code</h3>
+
+            <div class="qr-code-container">
+                <img src="{% static 'images/qr.png' %}" alt="Payment QR Code" class="qr-image">
+                <div class="qr-overlay">
+                    <div class="qr-info">
+                        <div class="payment-amount">NPR {{ price|intcomma }}</div>
+                        <div class="payment-id">{{ payment_id }}</div>
+                    </div>
+                </div>
+            </div>
+
+            <p style="color: #666; margin: 15px 0;">
+                <strong>Scan this QR code</strong> with your mobile banking app or payment wallet
+            </p>
+
+            <!-- Payment Instructions -->
+            <div class="payment-instructions">
+                <div class="instructions-title">📋 Payment Instructions</div>
+                <ul class="instructions-list">
+                    <li><i class="fas fa-check"></i> Take a screenshot or save this QR code</li>
+                    <li><i class="fas fa-check"></i> Open your mobile banking app (NIC Asia, NMB, etc.)</li>
+                    <li><i class="fas fa-check"></i> Scan the QR code to get payment details</li>
+                    <li><i class="fas fa-check"></i> Complete the payment using the provided details</li>
+                    <li><i class="fas fa-check"></i> Send payment screenshot to admin for verification</li>
+                    <li><i class="fas fa-check"></i> Admin will activate your premium subscription</li>
+                </ul>
+            </div>
+
+            <!-- Payment Actions -->
+            <div class="payment-actions">
+                <button onclick="generateQR()" class="action-btn btn-primary">
+                    <i class="fas fa-qrcode"></i> Generate QR Code
+                </button>
+                <button onclick="downloadReceipt()" class="action-btn btn-success">
+                    <i class="fas fa-download"></i> Download Receipt
+                </button>
+                <a href="{% url 'premium:premium_dashboard' %}" class="action-btn btn-warning">
+                    <i class="fas fa-home"></i> Back to Dashboard
+                </a>
+            </div>
+        </div>
+
+        <!-- Payment Receipt -->
+        <div class="payment-receipt">
+            <div class="receipt-header">
+                <div class="receipt-title">Payment Receipt</div>
+                <div class="receipt-id">Payment ID: {{ payment_id }}</div>
+            </div>
+
+            <div class="receipt-body">
+                <div class="receipt-section">
+                    <h4>Payment Details</h4>
+                    <div class="receipt-item">
+                        <span class="receipt-label">Amount:</span>
+                        <span class="receipt-value">NPR {{ price|intcomma }}</span>
+                    </div>
+                    <div class="receipt-item">
+                        <span class="receipt-label">Payment Method:</span>
+                        <span class="receipt-value">QR Code Payment</span>
+                    </div>
+                    <div class="receipt-item">
+                        <span class="receipt-label">Status:</span>
+                        <span class="receipt-value" style="color: #ffc107;">Pending Verification</span>
+                    </div>
+                    <div class="receipt-item">
+                        <span class="receipt-label">Date:</span>
+                        <span class="receipt-value">{{ payment_date|date:"M d, Y H:i" }}</span>
+                    </div>
+                </div>
+
+                <div class="receipt-section">
+                    <h4>Subscription Details</h4>
+                    <div class="receipt-item">
+                        <span class="receipt-label">Plan:</span>
+                        <span class="receipt-value">{{ plan_type|title }}</span>
+                    </div>
+                    <div class="receipt-item">
+                        <span class="receipt-label">Property:</span>
+                        <span class="receipt-value">{{ property.title }}</span>
+                    </div>
+                    <div class="receipt-item">
+                        <span class="receipt-label">Duration:</span>
+                        <span class="receipt-value">{{ duration_days }} days</span>
+                    </div>
+                    <div class="receipt-item">
+                        <span class="receipt-label">User:</span>
+                        <span class="receipt-value">{{ user.username }}</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Admin Contact Info -->
+    <div style="background: #fff3cd; padding: 20px; border-radius: 10px; text-align: center; margin-top: 20px;">
+        <h3 style="color: #856404; margin-bottom: 15px;">📞 Contact Admin for Verification</h3>
+        <p style="margin-bottom: 10px;">After completing payment, please contact our admin team for verification:</p>
+        <div style="display: flex; justify-content: center; gap: 20px; flex-wrap: wrap;">
+            <div>
+                <strong>Phone:</strong> +977-1234567890
+            </div>
+            <div>
+                <strong>Email:</strong> admin@gorkharealestate.com
+            </div>
+            <div>
+                <strong>WhatsApp:</strong> +977-1234567890
+            </div>
+        </div>
+        <p style="margin-top: 15px; font-size: 0.9em; color: #856404;">
+            Send your payment screenshot and this Payment ID for quick verification
+        </p>
+    </div>
+</div>
+
+<script>
+function generateQR() {
+    // In a real implementation, this would generate an actual QR code
+    alert('QR Code generation feature would be implemented here with a QR code library like qrcode.js');
+}
+
+function downloadReceipt() {
+    // In a real implementation, this would generate a PDF receipt
+    const printContent = document.querySelector('.payment-receipt').innerHTML;
+    const originalContent = document.body.innerHTML;
+
+    document.body.innerHTML = `
+        <html>
+        <head>
+            <title>Payment Receipt</title>
+            <style>
+                body { font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; }
+                .receipt-header { text-align: center; margin-bottom: 30px; }
+                .receipt-title { color: #0033A0; font-size: 24px; margin-bottom: 10px; }
+                .receipt-body { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 20px; }
+                .receipt-section { margin-bottom: 20px; }
+                .receipt-item { display: flex; justify-content: space-between; margin-bottom: 8px; }
+                .receipt-label { color: #666; }
+                .receipt-value { font-weight: bold; color: #333; }
+            </style>
+        </head>
+        <body>
+            <div class="receipt-header">
+                <h1 class="receipt-title">Payment Receipt</h1>
+                <p>Payment ID: {{ payment_id }}</p>
+            </div>
+            ${printContent}
+        </body>
+        </html>
+    `;
+
+    window.print();
+
+    // Restore original content
+    document.body.innerHTML = originalContent;
+
+    // Re-attach event listeners
+    document.addEventListener('DOMContentLoaded', function() {
+        // Re-attach your event listeners here if needed
+    });
+}
+
+// Auto-generate payment ID
+document.addEventListener('DOMContentLoaded', function() {
+    const paymentId = 'PAY_' + Math.random().toString(36).substr(2, 9).toUpperCase();
+    document.getElementById('payment_id').textContent = paymentId;
+});
+</script>
+{% endblock %}

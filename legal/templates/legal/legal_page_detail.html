@@ -1,0 +1,595 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}{{ page.title }} - Real Estate Net{% endblock %}
+
+{% block extra_css %}
+<style>
+.legal-page-container {
+    max-width: 900px;
+    margin: 0 auto;
+    padding: 2rem;
+    background: #ffffff;
+    min-height: calc(100vh - 300px);
+}
+
+.legal-page-container.dark-mode {
+    background: #1a1a1a;
+    color: #e0e0e0;
+}
+
+.legal-header {
+    text-align: center;
+    margin-bottom: 3rem;
+    padding-bottom: 2rem;
+    border-bottom: 3px solid #0033A0;
+}
+
+.legal-header h1 {
+    color: #dbdbe3ff;
+    font-size: 2.5rem;
+    font-weight: 800;
+    margin: 0 0 1rem 0;
+    text-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.legal-header .last-updated {
+    color: #666;
+    font-size: 0.95rem;
+    font-style: italic;
+    margin-top: 0.5rem;
+}
+
+.legal-content {
+    font-size: 1.1rem;
+    line-height: 1.8;
+    color: #333;
+}
+
+.legal-content.dark-mode {
+    color: #e0e0e0;
+}
+
+/* User-friendly Privacy Policy & Terms styling */
+.privacy-intro h1 {
+    font-size: 3rem;
+    font-weight: 900;
+    background: linear-gradient(135deg, #0033A0, #DC143C);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    margin: 0 0 0.5rem 0 !important;
+    border-bottom: none !important;
+}
+
+.privacy-intro .effective-date {
+    font-size: 1.3rem;
+    color: #666;
+    margin: 0 0 1rem 0;
+}
+
+.privacy-intro .intro-text {
+    font-size: 1.3rem;
+    color: #333;
+    line-height: 1.6;
+    margin-bottom: 2rem;
+}
+
+.policy-section {
+    background: #ffffff;
+    border: 1px solid #e9ecef;
+    border-radius: 12px;
+    padding: 2rem;
+    margin: 2rem 0;
+    box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+}
+
+.policy-section:first-of-type {
+    margin-top: 1rem;
+}
+
+.policy-section:nth-child(even) {
+    background: linear-gradient(135deg, #fafbfc, #f1f3f4);
+}
+
+.policy-section h2 {
+    font-size: 1.8rem;
+    font-weight: 700;
+    color: #0033A0;
+    margin: 0 0 1rem 0;
+    padding: 1rem 0;
+    border-bottom: 3px solid #e9ecef;
+    position: relative;
+}
+
+.policy-section h2::after {
+    content: '';
+    position: absolute;
+    bottom: -3px;
+    left: 0;
+    width: 80px;
+    height: 3px;
+    background: linear-gradient(90deg, #0033A0, #DC143C);
+}
+
+.policy-section h3 {
+    font-size: 1.3rem;
+    font-weight: 600;
+    color: #DC143C;
+    margin: 1.5rem 0 0.8rem 0;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.policy-section h3 i {
+    color: #0033A0;
+}
+
+.policy-section h4 {
+    font-size: 1.1rem;
+    font-weight: 600;
+    color: #0033A0;
+    margin: 1.2rem 0 0.5rem 0;
+}
+
+.policy-section p {
+    font-size: 1.1rem;
+    line-height: 1.7;
+    color: #333;
+    margin-bottom: 1.5rem;
+}
+
+/* Data Types Styling */
+.data-types {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 1.5rem;
+    margin: 1.5rem 0;
+}
+
+.data-types h3 {
+    background: linear-gradient(135deg, #0033A0, #DC143C);
+    color: white;
+    padding: 1rem;
+    border-radius: 8px;
+    margin: 0 0 1rem 0;
+    font-size: 1.2rem;
+}
+
+.data-types ul {
+    margin: 0;
+    padding-left: 1.2rem;
+}
+
+.data-types li {
+    margin-bottom: 0.8rem;
+    padding: 0.3rem 0;
+    color: #444;
+}
+
+/* Rights Grid */
+.rights-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 1.5rem;
+    margin: 1.5rem 0;
+}
+
+.rights-category {
+    background: #ffffff;
+    border: 2px solid #e9ecef;
+    border-radius: 10px;
+    padding: 1.5rem;
+    transition: all 0.3s ease;
+}
+
+.rights-category:hover {
+    border-color: #0033A0;
+    box-shadow: 0 4px 12px rgba(0,51,160,0.1);
+    transform: translateY(-2px);
+}
+
+.rights-category h3 {
+    background: linear-gradient(135deg, #0033A0, #DC143C);
+    color: white;
+    padding: 0.8rem;
+    border-radius: 6px;
+    margin: 0 0 1rem 0;
+    font-size: 1.1rem;
+}
+
+/* Important Notes */
+.important-note, .warning-note, .cookie-control {
+    background: linear-gradient(135deg, #fff3cd, #ffeaa7);
+    border: 1px solid #f39c12;
+    border-left: 4px solid #e74c3c;
+    border-radius: 8px;
+    padding: 1.5rem;
+    margin: 1.5rem 0;
+    position: relative;
+}
+
+.important-note::before, .warning-note::before {
+    content: '⚠️';
+    position: absolute;
+    top: 0.8rem;
+    left: 0.8rem;
+    font-size: 1.5rem;
+}
+
+.important-note p, .warning-note p, .important-note strong {
+    color: #844204;
+    margin: 0;
+    font-size: 1rem;
+    font-weight: 600;
+}
+
+.cookie-control {
+    background: linear-gradient(135deg, #e8f5e8, #c8e6c9);
+    border-color: #27ae60;
+    border-left-color: #27ae60;
+}
+
+.cookie-control::before {
+    content: '🍪';
+}
+
+/* Contact Section */
+.contact-section {
+    background: linear-gradient(135deg, #667eea, #764ba2);
+    color: white;
+}
+
+.contact-info {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 1rem;
+    margin: 1.5rem 0;
+}
+
+.contact-item {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    background: rgba(255,255,255,0.1);
+    padding: 1rem;
+    border-radius: 8px;
+    backdrop-filter: blur(10px);
+}
+
+.contact-item i {
+    color: #FFD700;
+    font-size: 1.3rem;
+    width: 30px;
+}
+
+.contact-item span {
+    flex: 1;
+    color: #ffffff !important;
+}
+
+.policy-footer {
+    text-align: center;
+    margin-top: 2rem;
+    font-size: 0.95rem;
+    color: #666;
+}
+
+/* List Styling */
+.legal-content ul {
+    margin: 1rem 0;
+    padding-left: 1.5rem;
+}
+
+.legal-content li {
+    margin-bottom: 0.8rem;
+    color: #333;
+    line-height: 1.5;
+}
+
+.legal-content li::marker {
+    color: #0033A0;
+}
+
+/* Strong and Emphasis */
+.legal-content strong {
+    font-weight: 700;
+    color: #0033A0;
+}
+
+.legal-content em {
+    font-style: italic;
+    color: #666;
+}
+
+.legal-content hr {
+    border: none;
+    height: 2px;
+    background: linear-gradient(to right, #0033A0, #DC143C, #0033A0);
+    margin: 2rem 0;
+}
+
+/* Terms of Service Styling */
+#terms-content h1 {
+    font-size: 2.5rem;
+    font-weight: 900;
+    background: linear-gradient(135deg, #0033A0, #DC143C);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    margin: 0 0 1rem 0;
+}
+
+.legal-content p {
+    margin-bottom: 1.5rem;
+    text-align: justify;
+}
+
+.legal-content strong {
+    font-weight: 700;
+    color: #0033A0;
+}
+
+.legal-content em {
+    font-style: italic;
+    color: #666;
+}
+
+.legal-content ul {
+    margin: 1rem 0;
+    padding-left: 2rem;
+}
+
+.legal-content li {
+    margin-bottom: 0.5rem;
+    list-style-type: disc;
+}
+
+.legal-content li::marker {
+    color: #0033A0;
+}
+
+.legal-content ol {
+    margin: 1rem 0;
+    padding-left: 2rem;
+}
+
+.legal-content ol li {
+    margin-bottom: 0.5rem;
+    list-style-type: decimal;
+}
+
+.legal-content blockquote {
+    background: #f8f9fa;
+    border-left: 4px solid #0033A0;
+    padding: 1rem 1.5rem;
+    margin: 1.5rem 0;
+    font-style: italic;
+    border-radius: 0 0.5rem 0.5rem 0;
+}
+
+.legal-content blockquote.dark-mode {
+    background: #2d2d2d;
+    border-left-color: #DC143C;
+}
+
+.legal-content code {
+    background: #f1f3f4;
+    padding: 0.2rem 0.4rem;
+    border-radius: 3px;
+    font-family: 'Courier New', monospace;
+    font-size: 0.9em;
+}
+
+.legal-content pre {
+    background: #f8f9fa;
+    border: 1px solid #e9ecef;
+    border-radius: 8px;
+    padding: 1rem;
+    overflow-x: auto;
+    margin: 1rem 0;
+}
+
+.legal-content pre.dark-mode {
+    background: #2d2d2d;
+    border-color: #444;
+}
+
+.legal-content hr {
+    border: none;
+    height: 2px;
+    background: linear-gradient(to right, #0033A0, #DC143C, #0033A0);
+    margin: 2rem 0;
+}
+
+.legal-action-buttons {
+    margin-top: 3rem;
+    padding: 2rem;
+    background: linear-gradient(135deg, #f8f9fa, #e3f2fd);
+    border-radius: 15px;
+    text-align: center;
+    border: 2px solid #e9ecef;
+}
+
+.legal-action-buttons.dark-mode {
+    background: linear-gradient(135deg, #2d2d2d, #1e3a5f);
+    border-color: #444;
+}
+
+.legal-action-buttons h3 {
+    color: #0033A0;
+    margin: 0 0 1rem 0;
+    font-size: 1.3rem;
+}
+
+.legal-buttons {
+    display: flex;
+    gap: 1rem;
+    justify-content: center;
+    flex-wrap: wrap;
+}
+
+.legal-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.8rem 1.5rem;
+    background: linear-gradient(135deg, #0033A0, #DC143C);
+    color: white;
+    text-decoration: none;
+    border-radius: 8px;
+    font-weight: 600;
+    transition: all 0.3s ease;
+    box-shadow: 0 4px 15px rgba(0,51,160,0.3);
+}
+
+.legal-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(0,51,160,0.4);
+}
+
+.legal-btn.secondary {
+    background: linear-gradient(135deg, #666, #999);
+}
+
+.legal-btn.secondary:hover {
+    box-shadow: 0 6px 20px rgba(102,102,102,0.4);
+}
+
+.back-home-link {
+    display: block;
+    margin-top: 2rem;
+    text-align: center;
+    padding: 1rem;
+}
+
+.back-home-link a {
+    color: #0033A0;
+    text-decoration: none;
+    font-weight: 600;
+    transition: color 0.3s ease;
+}
+
+.back-home-link a:hover {
+    color: #DC143C;
+}
+
+@media (max-width: 768px) {
+    .legal-page-container {
+        padding: 1rem;
+    }
+
+    .legal-header h1 {
+        font-size: 2rem;
+    }
+
+    .legal-content {
+        font-size: 1rem;
+    }
+
+    .legal-content h1 {
+        font-size: 1.8rem;
+    }
+
+    .legal-content h2 {
+        font-size: 1.5rem;
+        padding-left: 0.5rem;
+    }
+
+    .legal-buttons {
+        flex-direction: column;
+        align-items: center;
+    }
+
+    .legal-btn {
+        width: 200px;
+        text-align: center;
+    }
+}
+
+/* Table styling for any future tables */
+.legal-content table {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 1rem 0;
+    background: rgba(255,255,255,0.9);
+    border-radius: 8px;
+    overflow: hidden;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+}
+
+.legal-content table.dark-mode {
+    background: rgba(45,45,45,0.9);
+}
+
+.legal-content th,
+.legal-content td {
+    padding: 0.75rem;
+    border: 1px solid #e9ecef;
+    text-align: left;
+}
+
+.legal-content th {
+    background: #0033A0;
+    color: white;
+    font-weight: 700;
+}
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="legal-page-container">
+    <header class="legal-header">
+        <h1>{{ page.title }}</h1>
+        {% if page.updated_at %}
+        <p class="last-updated">Last updated: {{ page.updated_at|date:"F j, Y" }}</p>
+        {% endif %}
+    </header>
+
+    <article class="legal-content">
+        {{ page.content|safe }}
+    </article>
+
+    <section class="legal-action-buttons">
+        <h3>Need Help or Have Questions?</h3>
+        <div class="legal-buttons">
+            <a href="{% url 'contact:contact_form' %}" class="legal-btn">
+                <i class="fas fa-envelope"></i>
+                Contact Us
+            </a>
+            <a href="{% url 'home' %}" class="legal-btn secondary">
+                <i class="fas fa-home"></i>
+                Back to Home
+            </a>
+        </div>
+    </section>
+
+    <nav class="back-home-link">
+        <a href="{% url 'home' %}">
+            <i class="fas fa-arrow-left"></i>
+            Return to Real Estate Net
+        </a>
+    </nav>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Add smooth scrolling to anchor links if present
+    const hashLinks = document.querySelectorAll('a[href^="#"]');
+    hashLinks.forEach(link => {
+        link.addEventListener('click', function(e) {
+            const targetId = this.getAttribute('href');
+            const targetElement = document.querySelector(targetId);
+            if (targetElement) {
+                e.preventDefault();
+                targetElement.scrollIntoView({
+                    behavior: 'smooth',
+                    block: 'start'
+                });
+            }
+        });
+    });
+});
+</script>
+{% endblock %}

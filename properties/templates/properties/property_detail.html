@@ -1,0 +1,1516 @@
+{% extends 'base.html' %}
+{% load static %}
+{% load humanize %}
+
+{% block title %}{{ property.title }} - NPR {{ property.price|intcomma }} | {{ property.city }}, {{ property.state }}{% endblock %}
+
+{% block meta_description %}{{ property.title }} - {{ property.property_type }} in {{ property.city }}, {{ property.state }}. Price: NPR {{ property.price|intcomma }}. {% if property.square_footage %}Size: {{ property.square_footage }} sq ft. {% endif %}{% if property.bedrooms %}Bedrooms. {% endif %}{% if property.description %}{{ property.description|truncatechars:100 }}{% endif %} Browse this property listing on Gorkha Real Estate Net.{% endblock %}
+
+{% block meta_keywords %}property for {{ property.listing_type }}, {{ property.property_type }}, {{ property.city }}, {{ property.state }}, real estate, {% if property.square_footage %}{{ property.square_footage }} sq ft, {% endif %}NPR {{ property.price }}, {% if property.bedrooms %}bedrooms, {% endif %}{% if property.bathrooms %}bathrooms, {% endif %}property listing{% endblock %}
+
+{% block meta_robots %}index, follow, max-snippet:-1, max-image-preview:large, max-video-preview:-1{% endblock %}
+
+{% block og_type %}article{% endblock %}
+{% block og_url %}{{ request.build_absolute_uri }}{% endblock %}
+{% block og_title %}{{ property.title }} - NPR {{ property.price|intcomma }}{% endblock %}
+{% block og_description %}{{ property.description|truncatechars:200 }}{% endblock %}
+{% block og_image %}{% if property.images.exists %}{{ property.images.first.image.url }}{% elif property.floor_plan_image %}{{ property.floor_plan_image.url }}{% else %}{% static 'images/logo.jpeg' %}{% endif %}{% endblock %}
+
+{% block twitter_card %}summary_large_image{% endblock %}
+{% block twitter_title %}🏠 {{ property.title }} - NPR {{ property.price|intcomma }}{% endblock %}
+{% block twitter_description %}{{ property.city }}, {{ property.state }} - {{ property.property_type }} | Area: {% if property.square_footage %}{{ property.square_footage }} sq ft{% else %}Contact for details{% endif %}{% endblock %}
+{% block twitter_image %}{% if property.images.exists %}{{ property.images.first.image.url }}{% elif property.floor_plan_image %}{{ property.floor_plan_image.url }}{% else %}{% static 'images/logo.jpeg' %}{% endif %}{% endblock %}
+
+{% block content %}
+<div class="property-detail-container">
+    <div class="property-header">
+        <h1>{{ property.title }}</h1>
+        {% if property.is_premium %}
+            <div class="premium-badge">Premium Listing</div>
+        {% endif %}
+        {% if property.is_verified %}
+            <div class="verified-badge">Verified</div>
+        {% endif %}
+    </div>
+
+    <div class="property-content">
+        <div class="property-left">
+            <!-- Image Gallery -->
+            {% with approved_images=property.images.all %}
+            <div class="image-gallery">
+                <div class="main-image">
+                    {% for image in approved_images %}
+                        {% if image.status == 'approved' %}
+                            <img id="current-image" src="{{ image.image.url }}" alt="{{ image.caption }}" {% if not forloop.first %}style="display: none;"{% endif %}>
+                        {% endif %}
+                    {% endfor %}
+                </div>
+                <div class="thumbnail-strip">
+                    {% for image in approved_images %}
+                        {% if image.status == 'approved' %}
+                        <img src="{{ image.image.url }}" alt="{{ image.caption }}" class="thumbnail {% if forloop.first %}active{% endif %}" onclick="changeImage(this.src)">
+                        {% endif %}
+                    {% endfor %}
+                </div>
+            </div>
+            {% endwith %}
+
+            {% if property.floor_plan_image %}
+            <div class="image-gallery">
+                <div class="main-image">
+                    <img src="{{ property.floor_plan_image.url }}" alt="Floor Plan">
+                </div>
+            </div>
+            {% else %}
+            <div class="no-image-gallery">
+                <div class="no-image-placeholder">No images available</div>
+            </div>
+            {% endif %}
+
+            <!-- Virtual Tour & Floor Plan -->
+            <div class="media-section">
+                {% if property.virtual_tour_url %}
+                <div class="virtual-tour">
+                    <h3>Virtual Tour</h3>
+                    <div class="tour-link">
+                        <a href="{{ property.virtual_tour_url }}" target="_blank" class="tour-btn">Take 3D Virtual Tour</a>
+                    </div>
+                </div>
+                {% endif %}
+
+                {% if property.floor_plan_image %}
+                <div class="floor-plan">
+                    <h3>Floor Plan</h3>
+                    <img src="{{ property.floor_plan_image.url }}" alt="Floor Plan" class="floor-plan-img">
+                </div>
+                {% endif %}
+            </div>
+
+            <div class="property-info-section">
+                <h3>Property Details</h3>
+                <div class="property-details-grid">
+                    <div class="detail-item"><strong>Price:</strong> NPR {{ property.price|intcomma }}</div>
+                    <div class="detail-item"><strong>Location:</strong> {{ property.address }}, {{ property.city }}, {{ property.state }} {{ property.zip_code }}</div>
+                    <div class="detail-item"><strong>Property Type:</strong> {{ property.property_type }}</div>
+                    <div class="detail-item"><strong>Status:</strong> {{ property.get_status_display }}</div>
+                    {% if property.square_footage %}
+                    <div class="detail-item"><strong>Square Footage:</strong> {{ property.square_footage|intcomma }} sq ft</div>
+                    {% endif %}
+                    {% if property.lot_size %}
+                    <div class="detail-item"><strong>Lot Size:</strong> {{ property.lot_size|floatformat:2 }} acres</div>
+                    {% endif %}
+                    {% if property.year_built %}
+                    <div class="detail-item"><strong>Year Built:</strong> {{ property.year_built }}</div>
+                    {% endif %}
+                    {% if property.zoning %}
+                    <div class="detail-item"><strong>Zoning:</strong> {{ property.zoning }}</div>
+                    {% endif %}
+                </div>
+
+                {% if property.cap_rate or property.noi %}
+                <h3>Financial Information</h3>
+                <div class="financial-details">
+                    {% if property.cap_rate %}
+                    <div><strong>Cap Rate:</strong> {{ property.cap_rate }}%</div>
+                    {% endif %}
+                    {% if property.noi %}
+                    <div><strong>Net Operating Income (NOI):</strong> NPR {{ property.noi|intcomma }}</div>
+                    {% endif %}
+                </div>
+                {% endif %}
+            </div>
+
+            <div class="description-section">
+                <h3>Description</h3>
+                <p>{{ property.description }}</p>
+            </div>
+
+            {% if property.amenities.all %}
+            <div class="amenities-section">
+                <h3>Amenities</h3>
+                <div class="amenities-grid">
+                    {% for amenity in property.amenities.all %}
+                    <div class="amenity-item">{{ amenity.name }}</div>
+                    {% endfor %}
+                </div>
+            </div>
+            {% endif %}
+
+            {% if property.rent_roll %}
+            <div class="rent-roll-section">
+                <h3>Rent Roll</h3>
+                <div class="rent-roll-content">{{ property.rent_roll|linebreaksbr }}</div>
+            </div>
+            {% endif %}
+
+            {% if property.expense_summaries %}
+            <div class="expense-section">
+                <h3>Expense Summaries</h3>
+                <div class="expense-content">{{ property.expense_summaries|linebreaksbr }}</div>
+            </div>
+            {% endif %}
+        </div>
+
+        <div class="property-right">
+            <!-- Property Poster Information -->
+            <div class="agent-widget">
+                <div class="poster-info-header">
+                    <h3>Property Poster</h3>
+                    {% if property.user.user_type == 'broker' %}
+                        <span class="user-type-badge broker-badge">
+                            <i class="fas fa-building"></i> Real Estate Broker
+                        </span>
+                    {% elif property.user.user_type == 'buyer' %}
+                        <span class="user-type-badge buyer-badge">
+                            <i class="fas fa-home"></i> Property Buyer
+                        </span>
+                    {% else %}
+                        <span class="user-type-badge user-badge">
+                            <i class="fas fa-user"></i> Registered User
+                        </span>
+                    {% endif %}
+                </div>
+
+                <div class="poster-info">
+                    {% if property.user.profile_image %}
+                        <img src="{{ property.user.profile_image.url }}" alt="Property Poster" class="poster-image">
+                    {% else %}
+                        <div class="poster-avatar">
+                            <i class="fas fa-user-circle"></i>
+                        </div>
+                    {% endif %}
+                    <div class="poster-details">
+                        <div class="poster-name-meta">
+                            <h4 class="poster-name">{{ property.user.get_full_name|default:property.user.username }}</h4>
+                            {% if property.user.date_joined %}
+                                <p class="member-since">
+                                    <i class="fas fa-calendar-alt"></i> Member since {{ property.user.date_joined|date:"M Y" }}
+                                </p>
+                            {% endif %}
+                        </div>
+
+                        <div class="poster-contact">
+                            {% if property.user.phone_number %}
+                                <p class="contact-item">
+                                    <i class="fas fa-phone"></i>
+                                    <a href="tel:{{ property.user.phone_number }}">{{ property.user.phone_number }}</a>
+                                </p>
+                            {% endif %}
+                            {% if property.user.email %}
+                                <p class="contact-item">
+                                    <i class="fas fa-envelope"></i>
+                                    <a href="mailto:{{ property.user.email }}">{{ property.user.email }}</a>
+                                </p>
+                            {% endif %}
+                            {% if property.user.address %}
+                                <p class="contact-item">
+                                    <i class="fas fa-map-marker-alt"></i> {{ property.user.address }}
+                                </p>
+                            {% endif %}
+                            {% if property.user.company_name %}
+                                <p class="contact-item">
+                                    <i class="fas fa-building"></i> {{ property.user.company_name }}
+                                </p>
+                            {% endif %}
+                        </div>
+
+                        <div class="poster-stats">
+                            {% with properties_count=property.user.properties.count %}
+                            <p class="stats-item">
+                                <i class="fas fa-home"></i> {{ properties_count }} propert{% if properties_count != 1 %}ies{% else %}y{% endif %} listed
+                            </p>
+                            {% endwith %}
+                            {% if property.user.is_premium %}
+                                <p class="stats-item premium-status">
+                                    <i class="fas fa-star"></i> Premium Member
+                                </p>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Broker/Agent Info (if available) -->
+                {% if property.broker_name and property.broker_name != property.user.get_full_name|default:property.user.username %}
+                <div class="broker-info-section">
+                    <h4><i class="fas fa-user-tie"></i> Agent Information</h4>
+                    <div class="broker-details">
+                        <p><strong>{{ property.broker_name }}</strong></p>
+                        {% if property.broker_email %}
+                            <p><i class="fas fa-envelope"></i> {{ property.broker_email }}</p>
+                        {% endif %}
+                        {% if property.broker_phone %}
+                            <p><i class="fas fa-phone"></i> {{ property.broker_phone }}</p>
+                        {% endif %}
+                    </div>
+                </div>
+                {% endif %}
+
+                <!-- Contact Form -->
+                <div class="contact-form">
+                    <form method="post" action="{% url 'contact:contact_form' %}">
+                        {% csrf_token %}
+                        <input type="hidden" name="property_id" value="{{ property.pk }}">
+                        <input type="text" name="name" placeholder="Your Name" required>
+                        <input type="email" name="email" placeholder="Your Email" required>
+                        <input type="text" name="subject" placeholder="Subject" required value="Inquiry about {{ property.title }}">
+                        <textarea name="message" placeholder="Your message..." required rows="4"></textarea>
+                        <button type="submit" class="contact-submit-btn">Send Message</button>
+                    </form>
+                </div>
+            </div>
+
+            <!-- Quick Actions -->
+            <div class="quick-actions">
+                <a href="#" class="share-btn" onclick="showShareModal(event)"> <i class="fas fa-share"></i> Share Listing</a>
+                <a href="#" class="print-btn" onclick="window.print()"><i class="fas fa-print"></i> Print Details</a>
+                {% if user.is_authenticated %}
+                    <a href="#" class="favorite-btn"><i class="fas fa-heart"></i> Add to Favorites</a>
+                {% endif %}
+                {% if user.is_authenticated and user == property.user %}
+                    <a href="{% url 'properties:property_update' property.pk %}" class="edit-btn">
+                        <i class="fas fa-edit"></i> Edit Property
+                    </a>
+                    <a href="#" class="delete-btn" onclick="confirmDelete(event, '{% url 'properties:property_delete' property.pk %}')">
+                        <i class="fas fa-trash-alt"></i> Delete Property
+                    </a>
+                {% endif %}
+            </div>
+
+            <!-- Share Modal -->
+            <div id="shareModal" class="share-modal" style="display: none;">
+                <div class="share-modal-content">
+                    <div class="share-modal-header">
+                        <h3><i class="fas fa-share-alt"></i> Share This Property</h3>
+                        <span class="share-modal-close" onclick="closeShareModal()">&times;</span>
+                    </div>
+
+                    <div class="property-share-info">
+                        <div class="property-share-image">
+                            {% if property.images.exists %}
+                                {% with first_image=property.images.first %}
+                                    <img src="{{ first_image.image.url }}" alt="{{ property.title }}" loading="lazy">
+                                {% endwith %}
+                            {% elif property.floor_plan_image %}
+                                <img src="{{ property.floor_plan_image.url }}" alt="{{ property.title }}" loading="lazy">
+                            {% else %}
+                                <div class="no-share-image">🏠</div>
+                            {% endif %}
+                        </div>
+                        <div class="property-share-details">
+                            <h4>{{ property.title }}</h4>
+                            <p class="property-share-price">NPR {{ property.price|intcomma }}</p>
+                            <p class="property-share-location">{{ property.city }}, {{ property.state }}</p>
+                        </div>
+                    </div>
+
+                    <div class="share-platforms">
+                        <div class="share-platform" onclick="shareToWhatsApp()" title="Share on WhatsApp">
+                            <i class="fab fa-whatsapp"></i>
+                            <span>WhatsApp</span>
+                        </div>
+                        <div class="share-platform" onclick="shareToFacebook()" title="Share on Facebook">
+                            <i class="fab fa-facebook-f"></i>
+                            <span>Facebook</span>
+                        </div>
+                        <div class="share-platform" onclick="shareToTwitter()" title="Share on Twitter/X">
+                            <i class="fab fa-twitter"></i>
+                            <span>Twitter</span>
+                        </div>
+                        <div class="share-platform" onclick="shareToLinkedIn()" title="Share on LinkedIn">
+                            <i class="fab fa-linkedin-in"></i>
+                            <span>LinkedIn</span>
+                        </div>
+                        <div class="share-platform" onclick="shareViaEmail()" title="Share via Email">
+                            <i class="fas fa-envelope"></i>
+                            <span>Email</span>
+                        </div>
+                        <div class="share-platform" onclick="shareViaMessenger()" title="Share via Messenger">
+                            <i class="fab fa-facebook-messenger"></i>
+                            <span>Messenger</span>
+                        </div>
+                    </div>
+
+                    <div class="share-link-section">
+                        <h4><i class="fas fa-link"></i> Or copy the link:</h4>
+                        <div class="share-link-input">
+                            <input type="text" id="propertyShareUrl" value="{{ request.build_absolute_uri }}" readonly>
+                            <button onclick="copyShareLink()" class="copy-link-btn" title="Copy link">
+                                <i class="fas fa-copy"></i> Copy
+                            </button>
+                        </div>
+                    </div>
+                </div>
+                <div class="share-modal-overlay" onclick="closeShareModal()"></div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_css %}
+<style>
+.property-detail-container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 20px;
+}
+
+.property-header {
+    text-align: center;
+    margin-bottom: 40px;
+}
+
+.property-header h1 {
+    font-size: 2.5em;
+    color: var(--nepal-blue);
+    margin: 0 0 10px 0;
+}
+
+.premium-badge {
+    display: inline-block;
+    background: gold;
+    color: #333;
+    padding: 5px 15px;
+    border-radius: 20px;
+    font-weight: bold;
+    font-size: 0.9em;
+}
+
+.verified-badge {
+    display: inline-block;
+    background: green;
+    color: white;
+    padding: 5px 15px;
+    border-radius: 20px;
+    font-weight: bold;
+    font-size: 0.9em;
+    margin-left: 10px;
+}
+
+.property-content {
+    display: flex;
+    gap: 40px;
+}
+
+.property-left {
+    flex: 1;
+}
+
+.property-right {
+    width: 300px;
+}
+
+.image-gallery {
+    margin-bottom: 30px;
+}
+
+.main-image img {
+    width: 100%;
+    height: 400px;
+    object-fit: cover;
+    border-radius: 10px;
+    border: 2px solid #ddd;
+}
+
+.thumbnail-strip {
+    display: flex;
+    margin-top: 10px;
+    gap: 10px;
+}
+
+.thumbnail {
+    width: 80px;
+    height: 60px;
+    object-fit: cover;
+    border-radius: 5px;
+    cursor: pointer;
+    border: 2px solid #ddd;
+    transition: border-color 0.3s ease;
+}
+
+.thumbnail:hover,
+.thumbnail.active {
+    border-color: var(--nepal-blue);
+}
+
+.no-image-gallery {
+    background: linear-gradient(135deg, var(--nepal-blue), var(--nepal-crimson));
+    height: 400px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 10px;
+    color: white;
+    font-size: 1.5em;
+    font-weight: bold;
+}
+
+.media-section {
+    display: flex;
+    gap: 20px;
+    margin-bottom: 30px;
+}
+
+.virtual-tour,
+.floor-plan {
+    flex: 1;
+}
+
+.tour-link {
+    text-align: center;
+}
+
+.tour-btn {
+    background: var(--nepal-blue);
+    color: white;
+    padding: 15px 30px;
+    border-radius: 5px;
+    text-decoration: none;
+    font-weight: bold;
+    display: inline-block;
+    transition: background-color 0.3s ease;
+}
+
+.tour-btn:hover {
+    background: #002a70;
+}
+
+.floor-plan-img {
+    width: 100%;
+    border-radius: 5px;
+    border: 2px solid #ddd;
+}
+
+.property-info-section {
+    background: #f9f9f9;
+    padding: 20px;
+    border-radius: 10px;
+    margin-bottom: 30px;
+}
+
+.property-details-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 15px;
+}
+
+.detail-item {
+    margin: 10px 0;
+}
+
+.financial-details div {
+    margin: 10px 0;
+}
+
+.description-section {
+    margin-bottom: 30px;
+}
+
+.description-section p {
+    line-height: 1.6;
+    font-size: 1.1em;
+}
+
+.amenities-section {
+    background: #f9f9f9;
+    padding: 20px;
+    border-radius: 10px;
+    margin-bottom: 30px;
+}
+
+.amenities-grid {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+}
+
+.amenity-item {
+    background: white;
+    padding: 8px 15px;
+    border-radius: 20px;
+    border: 1px solid #ddd;
+    font-size: 0.9em;
+}
+
+/* Property Poster Information Styles */
+.poster-info-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+    padding-bottom: 15px;
+    border-bottom: 2px solid #f0f0f0;
+}
+
+.poster-info-header h3 {
+    margin: 0;
+    color: var(--nepal-blue);
+    font-size: 1.4em;
+}
+
+.user-type-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 6px 12px;
+    border-radius: 20px;
+    font-size: 0.85em;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.broker-badge {
+    background: linear-gradient(135deg, #007bff, #0056b3);
+    color: white;
+}
+
+.buyer-badge {
+    background: linear-gradient(135deg, #28a745, #1e5f28);
+    color: white;
+}
+
+.user-badge {
+    background: linear-gradient(135deg, #6c757d, #495057);
+    color: white;
+}
+
+.user-type-badge i {
+    font-size: 0.9em;
+}
+
+.poster-info {
+    display: flex;
+    align-items: flex-start;
+    gap: 15px;
+    margin-bottom: 20px;
+    padding: 20px;
+    background: #f8f9fa;
+    border-radius: 10px;
+    border: 1px solid #e9ecef;
+}
+
+.poster-image {
+    width: 70px;
+    height: 70px;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 3px solid var(--nepal-blue);
+}
+
+.poster-avatar {
+    width: 70px;
+    height: 70px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, var(--nepal-blue), var(--nepal-crimson));
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 2em;
+    color: white;
+    border: 3px solid var(--nepal-blue);
+}
+
+.poster-details {
+    flex: 1;
+}
+
+.poster-name-meta {
+    margin-bottom: 15px;
+}
+
+.poster-name {
+    margin: 0 0 8px 0;
+    font-size: 1.4em;
+    font-weight: 700;
+    color: var(--nepal-blue);
+}
+
+.member-since {
+    margin: 0;
+    font-size: 0.9em;
+    color: #666;
+    font-weight: 500;
+}
+
+.poster-contact {
+    margin-bottom: 15px;
+}
+
+.contact-item {
+    margin: 8px 0;
+    font-size: 0.95em;
+    color: #333;
+}
+
+.contact-item i {
+    width: 16px;
+    margin-right: 8px;
+    color: var(--nepal-blue);
+}
+
+.contact-item a {
+    color: var(--nepal-crimson);
+    text-decoration: none;
+    transition: color 0.3s ease;
+}
+
+.contact-item a:hover {
+    color: #bd1a2e;
+    text-decoration: underline;
+}
+
+.poster-stats {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.stats-item {
+    margin: 0;
+    font-size: 0.9em;
+    color: #555;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.stats-item i {
+    color: var(--nepal-blue);
+    font-size: 0.9em;
+}
+
+.premium-status {
+    color: var(--nepal-crimson) !important;
+    font-weight: 600;
+}
+
+.broker-info-section {
+    margin-top: 20px;
+    padding: 15px;
+    background: #fff3cd;
+    border: 1px solid #ffeaa7;
+    border-radius: 8px;
+}
+
+.broker-info-section h4 {
+    margin: 0 0 10px 0;
+    color: #856404;
+    font-size: 1.1em;
+}
+
+.broker-details {
+    font-size: 0.9em;
+    color: #856404;
+}
+
+.broker-details p {
+    margin: 5px 0;
+}
+
+.agent-widget {
+    background: white;
+    padding: 20px;
+    border-radius: 10px;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+    margin-bottom: 20px;
+}
+
+.agent-info {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    margin-bottom: 20px;
+}
+
+.agent-image {
+    width: 60px;
+    height: 60px;
+    border-radius: 50%;
+}
+
+.agent-details h4 {
+    margin: 0 0 10px 0;
+    color: var(--nepal-blue);
+}
+
+.agent-details p {
+    margin: 5px 0;
+    font-size: 0.9em;
+}
+
+.contact-form input,
+.contact-form textarea {
+    width: 100%;
+    padding: 10px;
+    margin: 8px 0;
+    border: 1px solid #ddd;
+    border-radius: 5px;
+    font-family: inherit;
+}
+
+.contact-submit-btn {
+    width: 100%;
+    background: var(--nepal-crimson);
+    color: white;
+    border: none;
+    padding: 12px;
+    border-radius: 5px;
+    font-weight: bold;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+}
+
+.contact-submit-btn:hover {
+    background: var(--nepal-border);
+}
+
+.quick-actions {
+    background: white;
+    padding: 20px;
+    border-radius: 10px;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+}
+
+.quick-actions a {
+    display: block;
+    color: var(--nepal-blue);
+    text-decoration: none;
+    margin: 10px 0;
+    transition: color 0.3s ease;
+}
+
+.quick-actions a:hover {
+    color: #002a70;
+}
+
+/* Delete Button Styling */
+.quick-actions a.delete-btn {
+    background: linear-gradient(135deg, #dc3545, #c82333);
+    color: white;
+    padding: 8px 12px;
+    border-radius: 6px;
+    text-align: center;
+    border: 2px solid transparent;
+    transition: all 0.3s ease;
+}
+
+.quick-actions a.delete-btn:hover {
+    background: linear-gradient(135deg, #c82333, #a02622);
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(220, 53, 69, 0.3);
+    color: white;
+}
+
+/* Edit Button Styling */
+.quick-actions a.edit-btn {
+    background: linear-gradient(135deg, #28a745, #218838);
+    color: white;
+    padding: 8px 12px;
+    border-radius: 6px;
+    text-align: center;
+    border: 2px solid transparent;
+    transition: all 0.3s ease;
+}
+
+.quick-actions a.edit-btn:hover {
+    background: linear-gradient(135deg, #218838, #1e7e34);
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(40, 167, 69, 0.3);
+    color: white;
+}
+
+/* Share Modal Styles */
+.share-modal {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: 10000;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.share-modal-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.7);
+    backdrop-filter: blur(5px);
+}
+
+.share-modal-content {
+    position: relative;
+    background: white;
+    border-radius: 15px;
+    width: 90%;
+    max-width: 500px;
+    max-height: 90vh;
+    overflow-y: auto;
+    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);
+    animation: slideIn 0.3s ease-out;
+}
+
+@keyframes slideIn {
+    from {
+        transform: scale(0.9) translateY(-20px);
+        opacity: 0;
+    }
+    to {
+        transform: scale(1) translateY(0);
+        opacity: 1;
+    }
+}
+
+.share-modal-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 20px 25px;
+    border-bottom: 2px solid #f0f0f0;
+    background: linear-gradient(135deg, #f8f9fa, #e9ecef);
+    border-radius: 15px 15px 0 0;
+}
+
+.share-modal-header h3 {
+    margin: 0;
+    color: var(--nepal-blue);
+    font-size: 1.4em;
+    font-weight: 700;
+}
+
+.share-modal-header i {
+    margin-right: 10px;
+    color: var(--nepal-blue);
+}
+
+.share-modal-close {
+    font-size: 2em;
+    color: #666;
+    cursor: pointer;
+    padding: 5px;
+    line-height: 1;
+    transition: color 0.3s ease;
+}
+
+.share-modal-close:hover {
+    color: var(--nepal-crimson);
+}
+
+.property-share-info {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    padding: 20px 25px;
+    border-bottom: 1px solid #f0f0f0;
+    background: #f8f9fa;
+}
+
+.property-share-image {
+    flex-shrink: 0;
+}
+
+.property-share-image img {
+    width: 70px;
+    height: 70px;
+    object-fit: cover;
+    border-radius: 8px;
+    border: 2px solid #ddd;
+}
+
+.no-share-image {
+    width: 70px;
+    height: 70px;
+    background: linear-gradient(135deg, var(--nepal-blue), var(--nepal-crimson));
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 2em;
+    border-radius: 8px;
+    border: 2px solid #ddd;
+}
+
+.property-share-details {
+    flex: 1;
+}
+
+.property-share-details h4 {
+    margin: 0 0 8px 0;
+    color: var(--nepal-blue);
+    font-size: 1.1em;
+    font-weight: 600;
+    line-height: 1.3;
+}
+
+.property-share-price {
+    margin: 5px 0;
+    font-size: 1.1em;
+    font-weight: 700;
+    color: var(--nepal-crimson);
+}
+
+.property-share-location {
+    margin: 5px 0;
+    color: #666;
+    font-size: 0.9em;
+}
+
+.share-platforms {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+    gap: 15px;
+    padding: 25px;
+}
+
+.share-platform {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 8px;
+    padding: 15px 10px;
+    border: 2px solid #e9ecef;
+    border-radius: 10px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    background: white;
+}
+
+.share-platform:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+    border-color: var(--nepal-blue);
+}
+
+.share-platform:active {
+    transform: translateY(-1px);
+}
+
+.share-platform i {
+    font-size: 2em;
+    margin-bottom: 5px;
+}
+
+.share-platform .fab.fa-whatsapp {
+    color: #25D366;
+}
+
+.share-platform .fab.fa-facebook-f {
+    color: #1877F2;
+}
+
+.share-platform .fab.fa-twitter {
+    color: #000000;
+}
+
+.share-platform .fab.fa-linkedin-in {
+    color: #0077B5;
+}
+
+.share-platform .fas.fa-envelope {
+    color: #EA4335;
+}
+
+.share-platform .fab.fa-facebook-messenger {
+    color: #448AFF;
+}
+
+.share-platform span {
+    font-size: 0.9em;
+    font-weight: 600;
+    color: #333;
+    text-align: center;
+}
+
+.share-link-section {
+    padding: 20px 25px;
+    border-top: 1px solid #f0f0f0;
+}
+
+.share-link-section h4 {
+    margin: 0 0 15px 0;
+    color: var(--nepal-blue);
+    font-size: 1.1em;
+}
+
+.share-link-section i {
+    margin-right: 8px;
+}
+
+.share-link-input {
+    display: flex;
+    gap: 10px;
+}
+
+.share-link-input input {
+    flex: 1;
+    padding: 12px;
+    border: 2px solid #e9ecef;
+    border-radius: 8px;
+    font-size: 0.9em;
+    color: #333;
+    background: #f8f9fa;
+}
+
+.share-link-input .copy-link-btn {
+    padding: 12px 20px;
+    background: var(--nepal-blue);
+    color: white;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    font-weight: 600;
+    transition: background 0.3s ease;
+    white-space: nowrap;
+}
+
+.share-link-input .copy-link-btn:hover {
+    background: #002a70;
+}
+
+.share-link-input .copy-link-btn i {
+    margin-right: 5px;
+}
+
+/* Responsive adjustments for share modal */
+@media (max-width: 600px) {
+    .share-modal-content {
+        width: 95%;
+        max-height: 95vh;
+    }
+
+    .share-modal-header {
+        padding: 15px 20px;
+    }
+
+    .property-share-info {
+        padding: 15px 20px;
+        flex-direction: column;
+        text-align: center;
+    }
+
+    .share-platforms {
+        grid-template-columns: repeat(3, 1fr);
+        padding: 20px 15px;
+        gap: 12px;
+    }
+
+    .share-platform {
+        padding: 12px 8px;
+    }
+
+    .share-platform i {
+        font-size: 1.8em;
+    }
+
+    .share-link-section {
+        padding: 15px 20px;
+    }
+
+    .share-link-input {
+        flex-direction: column;
+    }
+}
+
+@media (max-width: 768px) {
+    .property-content {
+        flex-direction: column;
+    }
+
+    .property-right {
+        width: 100%;
+    }
+
+    .media-section {
+        flex-direction: column;
+    }
+}
+</style>
+{% endblock %}
+
+{% block extra_js %}
+<script src="{% static 'js/script.js' %}"></script>
+<script>
+function changeImage(newSrc) {
+    document.getElementById('current-image').src = newSrc;
+    // Update active thumbnail
+    const thumbnails = document.querySelectorAll('.thumbnail');
+    thumbnails.forEach(thumb => thumb.classList.remove('active'));
+    event.target.classList.add('active');
+}
+
+// Share Modal Functions
+function showShareModal(event) {
+    event.preventDefault();
+    const modal = document.getElementById('shareModal');
+    modal.style.display = 'flex';
+    document.body.style.overflow = 'hidden'; // Prevent background scrolling
+
+    // Track share modal open (optional analytics)
+    if (typeof gtag !== 'undefined') {
+        gtag('event', 'share_modal_opened', {
+            'event_category': 'engagement',
+            'event_label': '{{ property.title }}'
+        });
+    }
+}
+
+function closeShareModal() {
+    const modal = document.getElementById('shareModal');
+    modal.style.display = 'none';
+    document.body.style.overflow = 'auto'; // Restore scrolling
+}
+
+// Get property share data for consistent sharing across platforms
+function getShareData() {
+    const propertyTitle = "{{ property.title|escapejs }}";
+    const propertyPrice = "NPR {{ property.price|intcomma }}";
+    const propertyLocation = "{{ property.city }}, {{ property.state }}";
+    const currentUrl = "{{ request.build_absolute_uri }}";
+
+    return {
+        title: propertyTitle,
+        price: propertyPrice,
+        location: propertyLocation,
+        url: currentUrl,
+        text: `Check out this amazing property: ${propertyTitle} - ${propertyPrice} in ${propertyLocation}. ${currentUrl}`
+    };
+}
+
+// WhatsApp Sharing
+function shareToWhatsApp() {
+    const data = getShareData();
+
+    // Check if mobile or desktop
+    const isMobile = /Android|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+
+    let whatsappUrl;
+    if (isMobile) {
+        // Direct app (mobile)
+        whatsappUrl = `whatsapp://send?text=${encodeURIComponent(data.text)}`;
+    } else {
+        // Web version (desktop)
+        whatsappUrl = `https://wa.me/?text=${encodeURIComponent(data.text)}`;
+    }
+
+    window.open(whatsappUrl, '_blank', 'width=600,height=400');
+
+    // Track share
+    trackShare('whatsapp');
+}
+
+// Facebook Sharing
+function shareToFacebook() {
+    const data = getShareData();
+    const facebookUrl = `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(data.url)}&quote=${encodeURIComponent(data.title + ' - ' + data.price + ' in ' + data.location)}`;
+
+    window.open(facebookUrl, '_blank', 'width=600,height=400');
+    trackShare('facebook');
+}
+
+// Twitter/X Sharing
+function shareToTwitter() {
+    const data = getShareData();
+    const tweetText = `🏠 ${data.title} - ${data.price} in ${data.location} ${data.url}`;
+
+    // Twitter intent URL
+    const twitterUrl = `https://twitter.com/intent/tweet?text=${encodeURIComponent(tweetText)}`;
+
+    window.open(twitterUrl, '_blank', 'width=600,height=400');
+    trackShare('twitter');
+}
+
+// LinkedIn Sharing
+function shareToLinkedIn() {
+    const data = getShareData();
+    const linkedinUrl = `https://www.linkedin.com/sharing/share-offsite/?url=${encodeURIComponent(data.url)}&title=${encodeURIComponent(data.title)}&summary=${encodeURIComponent('Property for sale: ' + data.price + ' located in ' + data.location)}`;
+
+    window.open(linkedinUrl, '_blank', 'width=600,height=400');
+    trackShare('linkedin');
+}
+
+// Email Sharing
+function shareViaEmail() {
+    const data = getShareData();
+    const subject = encodeURIComponent(`Property for Sale: ${data.title}`);
+    const body = encodeURIComponent(`Hi,
+
+I thought you might be interested in this property:
+
+${data.title}
+Price: ${data.price}
+Location: ${data.location}
+
+Check it out: ${data.url}
+
+Best regards`);
+
+    const emailUrl = `mailto:?subject=${subject}&body=${body}`;
+    window.open(emailUrl);
+    trackShare('email');
+}
+
+// Messenger Sharing
+function shareViaMessenger() {
+    const data = getShareData();
+    // Using Facebook's Messenger sharing
+    const messengerUrl = `fb-messenger://share/?link=${encodeURIComponent(data.url)}&app_id=123456789`;
+
+    // Fallback to web version if app isn't available
+    if (!navigator.share) {
+        const webMessengerUrl = `https://www.facebook.com/dialog/send?link=${encodeURIComponent(data.url)}&app_id=123456789&redirect_uri=${encodeURIComponent(window.location.href)}`;
+        window.open(webMessengerUrl, '_blank', 'width=600,height=400');
+        trackShare('messenger');
+    } else {
+        // Use native share API if available (for progressive enhancement)
+        if (navigator.share) {
+            navigator.share({
+                title: data.title,
+                text: data.text,
+                url: data.url
+            }).then(() => {
+                trackShare('native-share');
+            }).catch(console.error);
+        } else {
+            window.open(messengerUrl, '_blank', 'width=600,height=400');
+            trackShare('messenger');
+        }
+    }
+    trackShare('messenger');
+}
+
+// Copy Link to Clipboard
+function copyShareLink() {
+    const linkInput = document.getElementById('propertyShareUrl');
+
+    // Select the URL
+    linkInput.select();
+    linkInput.setSelectionRange(0, 99999); // For mobile devices
+
+    // Copy to clipboard
+    try {
+        document.execCommand('copy');
+        // Show success feedback
+        const copyBtn = document.querySelector('.copy-link-btn');
+        const originalText = copyBtn.innerHTML;
+        copyBtn.innerHTML = '<i class="fas fa-check"></i> Copied!';
+        copyBtn.style.background = '#28a745';
+
+        setTimeout(() => {
+            copyBtn.innerHTML = originalText;
+            copyBtn.style.background = '';
+        }, 2000);
+
+        trackShare('copy-link');
+    } catch (err) {
+        console.error('Failed to copy: ', err);
+        // Fallback for older browsers
+        alert('Link copied: ' + linkInput.value);
+    }
+}
+
+// Track share events (for analytics)
+function trackShare(platform) {
+    // Track with Google Analytics (if available)
+    if (typeof gtag !== 'undefined') {
+        gtag('event', 'share_property', {
+            'event_category': 'social_sharing',
+            'event_label': platform,
+            'value': '{{ property.pk }}'
+        });
+    }
+
+    // Track with our backend analytics
+    trackShareBackend(platform, '{{ property.pk }}', 'property');
+
+    // Close modal after sharing on mobile devices to improve UX
+    if (window.innerWidth <= 768) {
+        setTimeout(closeShareModal, 1000);
+    }
+
+    // Show success message (optional)
+    console.log(`Shared property via ${platform}`);
+}
+
+// Track share events in our backend
+function trackShareBackend(platform, contentId, contentType) {
+    // Send tracking data to our backend
+    fetch('{% url "analytics:track_social_share" %}', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'X-CSRFToken': '{{ csrf_token }}'
+        },
+        body: JSON.stringify({
+            platform: platform,
+            content_type: contentType,
+            content_id: parseInt(contentId),
+            page_title: '{{ property.title }}',
+            url: window.location.href,
+            metadata: {
+                user_agent: navigator.userAgent,
+                screen_resolution: screen.width + 'x' + screen.height,
+                referrer: document.referrer
+            }
+        })
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            console.log('Share tracked successfully:', data.message);
+        } else {
+            console.warn('Failed to track share:', data.message);
+        }
+    })
+    .catch(error => {
+        console.error('Error tracking share:', error);
+    });
+}
+
+// Close modal on Escape key
+document.addEventListener('keydown', function(event) {
+    if (event.key === 'Escape') {
+        closeShareModal();
+    }
+});
+
+// Property Delete Confirmation Function
+function confirmDelete(event, deleteUrl) {
+    event.preventDefault(); // Prevent default link behavior
+
+    // Create confirmation modal
+    const modal = document.createElement('div');
+    modal.style.cssText = `
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(0, 0, 0, 0.7);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        z-index: 10000;
+    `;
+
+    modal.innerHTML = `
+        <div style="
+            background: white;
+            border-radius: 15px;
+            padding: 30px;
+            max-width: 450px;
+            width: 90%;
+            text-align: center;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);
+            animation: slideIn 0.3s ease-out;
+        ">
+            <div style="margin-bottom: 20px;">
+                <i class="fas fa-exclamation-triangle" style="
+                    font-size: 4em;
+                    color: #dc3545;
+                    margin-bottom: 15px;
+                "></i>
+                <h3 style="
+                    margin: 0 0 15px 0;
+                    color: #333;
+                    font-size: 1.5em;
+                ">Delete Property</h3>
+                <p style="
+                    margin: 0;
+                    color: #666;
+                    line-height: 1.5;
+                    font-size: 1.1em;
+                ">
+                    Are you sure you want to delete this property? <br>
+                    <strong style="color: #dc3545;">This action cannot be undone!</strong> <br>
+                    All associated images and data will be permanently removed.
+                </p>
+            </div>
+            <div style="display: flex; gap: 15px; justify-content: center;">
+                <button onclick="this.closest('div').parentElement.remove()" style="
+                    background: #6c757d;
+                    color: white;
+                    border: none;
+                    padding: 12px 25px;
+                    border-radius: 6px;
+                    font-weight: bold;
+                    cursor: pointer;
+                    transition: background 0.3s ease;
+                " onmouseover="this.style.background='#5a6268'" onmouseout="this.style.background='#6c757d'">
+                    Cancel
+                </button>
+                <button onclick="proceedDelete('${deleteUrl}')" style="
+                    background: linear-gradient(135deg, #dc3545, #c82333);
+                    color: white;
+                    border: none;
+                    padding: 12px 25px;
+                    border-radius: 6px;
+                    font-weight: bold;
+                    cursor: pointer;
+                    transition: all 0.3s ease;
+                " onmouseover="this.style.transform='translateY(-1px); this.style.background=linear-gradient(135deg, #c82333, #a02622)'" onmouseout="this.style.transform='none'; this.style.background=linear-gradient(135deg, #dc3545, #c82333)'">
+                    <i class="fas fa-trash-alt" style="margin-right: 8px;"></i>
+                    Delete Property
+                </button>
+            </div>
+        </div>
+    `;
+
+    // Prevent body scrolling
+    document.body.style.overflow = 'hidden';
+
+    // Add modal to body
+    document.body.appendChild(modal);
+
+    // Add escape key handler
+    const closeModal = () => {
+        modal.remove();
+        document.body.style.overflow = 'auto';
+    };
+
+    document.addEventListener('keydown', function handler(event) {
+        if (event.key === 'Escape') {
+            closeModal();
+            document.removeEventListener('keydown', handler);
+        }
+    });
+
+    // Close modal when clicking overlay
+    modal.addEventListener('click', function(event) {
+        if (event.target === modal) {
+            closeModal();
+        }
+    });
+}
+
+function proceedDelete(deleteUrl) {
+    // Create a form to submit POST request (Django requires POST for delete)
+    const form = document.createElement('form');
+    form.method = 'POST';
+    form.action = deleteUrl;
+
+    // Add CSRF token
+    const csrfToken = document.querySelector('[name=csrfmiddlewaretoken]');
+    if (csrfToken) {
+        const csrfField = document.createElement('input');
+        csrfField.type = 'hidden';
+        csrfField.name = 'csrfmiddlewaretoken';
+        csrfField.value = csrfToken.value;
+        form.appendChild(csrfField);
+    }
+
+    document.body.appendChild(form);
+    form.submit();
+}
+
+// Initialize: close modal if user clicks outside
+document.addEventListener('DOMContentLoaded', function() {
+    // The modal overlay click is already handled in HTML
+    console.log('Property share modal initialized');
+    console.log('Property delete confirmation initialized');
+});
+</script>
+{% endblock %}

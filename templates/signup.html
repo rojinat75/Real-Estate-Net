@@ -1,0 +1,446 @@
+{% extends 'base.html' %}
+{% load socialaccount %}
+{% load static %}
+
+{% block title %}Sign Up - Real Estate Nepal{% endblock %}
+
+{% block extra_css %}
+<style>
+.signup-container {
+    max-width: 600px;
+    margin: 0 auto;
+    padding: 40px 20px;
+    background: #f8f9fa;
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.signup-card {
+    background: white;
+    padding: 40px;
+    border-radius: 15px;
+    box-shadow: 0 8px 25px rgba(0,0,0,0.1);
+    width: 100%;
+    max-width: 550px;
+}
+
+.signup-header {
+    text-align: center;
+    margin-bottom: 30px;
+}
+
+.signup-header h1 {
+    color: #0033A0;
+    margin: 0 0 10px 0;
+    font-size: 2.2em;
+    font-weight: 900;
+}
+
+.signup-header p {
+    color: #666;
+    margin: 0;
+    font-size: 1.1em;
+}
+
+.signup-form {
+    margin-bottom: 30px;
+}
+
+.form-row {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 20px;
+    margin-bottom: 20px;
+}
+
+.form-group {
+    margin-bottom: 20px;
+}
+
+.form-group label {
+    display: block;
+    color: #0033A0;
+    font-weight: 600;
+    margin-bottom: 8px;
+    font-size: 1em;
+}
+
+.form-group input,
+.form-group select {
+    width: 100%;
+    padding: 12px 15px;
+    border: 2px solid #e9ecef;
+    border-radius: 8px;
+    font-size: 1em;
+    transition: border-color 0.3s ease;
+    box-sizing: border-box;
+}
+
+.form-group input:focus,
+.form-group select:focus {
+    outline: none;
+    border-color: #0033A0;
+}
+
+/* Password field with toggle */
+.password-group {
+    position: relative;
+}
+
+.password-group input {
+    padding-right: 45px;
+}
+
+.password-toggle {
+    position: absolute;
+    right: 12px;
+    top: 50%;
+    transform: translateY(-50%);
+    background: none;
+    border: none;
+    color: #666;
+    cursor: pointer;
+    font-size: 1.1em;
+    transition: color 0.3s ease;
+}
+
+.password-toggle:hover {
+    color: #0033A0;
+}
+
+.signup-btn {
+    width: 100%;
+    background: linear-gradient(135deg, #0033A0, #DC143C);
+    color: white;
+    border: none;
+    padding: 15px;
+    border-radius: 8px;
+    font-size: 1.1em;
+    font-weight: 700;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.signup-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 20px rgba(0,51,160,0.3);
+}
+
+.divider {
+    text-align: center;
+    margin: 25px 0;
+    position: relative;
+    color: #666;
+    font-size: 0.9em;
+}
+
+.divider::before {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 0;
+    right: 0;
+    height: 1px;
+    background: #ddd;
+    z-index: 1;
+}
+
+.divider span {
+    background: white;
+    padding: 0 15px;
+    position: relative;
+    z-index: 2;
+}
+
+
+
+.login-link {
+    text-align: center;
+    margin-top: 25px;
+    padding: 20px;
+    background: #e3f2fd;
+    border-radius: 10px;
+}
+
+.login-link p {
+    margin: 0 0 15px 0;
+    color: #333;
+}
+
+.login-link a {
+    color: #0033A0;
+    text-decoration: none;
+    font-weight: 600;
+    transition: color 0.3s ease;
+}
+
+.login-link a:hover {
+    color: #DC143C;
+}
+
+/* Horizontal Social Icons Layout */
+.social-login-horizontal {
+    text-align: center;
+    margin-bottom: 25px;
+}
+
+.social-login-text {
+    margin: 0 0 15px 0;
+    color: #666;
+    font-size: 0.9em;
+    font-weight: 500;
+}
+
+.social-icons-horizontal {
+    display: flex;
+    justify-content: center;
+    gap: 15px;
+    align-items: center;
+}
+
+.social-icon-link {
+    text-decoration: none;
+    transition: transform 0.2s ease;
+}
+
+.social-icon-link:hover {
+    transform: translateY(-2px);
+}
+
+.social-icon {
+    width: 44px;
+    height: 44px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border: 2px solid #e1e5e9;
+    background: #ffffff;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+    transition: all 0.3s ease;
+    position: relative;
+    overflow: hidden;
+}
+
+.social-icon:hover {
+    transform: scale(1.05);
+    box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+}
+
+.google-icon:hover {
+    border-color: #4285f4;
+    box-shadow: 0 4px 12px rgba(66, 133, 244, 0.3);
+}
+
+.facebook-icon:hover {
+    border-color: #1877f2;
+    box-shadow: 0 4px 12px rgba(24, 119, 242, 0.3);
+}
+
+.linkedin-icon:hover {
+    border-color: #0077b5;
+    box-shadow: 0 4px 12px rgba(0, 119, 181, 0.3);
+}
+
+.twitter-icon:hover {
+    border-color: #1da1f2;
+    box-shadow: 0 4px 12px rgba(29, 161, 242, 0.3);
+}
+
+/* Responsive social icons */
+@media (max-width: 768px) {
+    .signup-container {
+        padding: 20px 10px;
+    }
+
+    .signup-card {
+        padding: 25px;
+    }
+
+    .social-buttons,
+    .form-row {
+        grid-template-columns: 1fr;
+    }
+
+    .social-icons-horizontal {
+        gap: 12px;
+    }
+
+    .social-icon {
+        width: 40px;
+        height: 40px;
+    }
+
+    .social-icon img {
+        width: 22px !important;
+        height: 22px !important;
+    }
+}
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="signup-container">
+    <div class="signup-card">
+        <div class="signup-header">
+            <h1>🚀 Join Real Estate Nepal</h1>
+            <p>Create your account and start your real estate journey</p>
+        </div>
+
+        <!-- Social Signup Buttons - Horizontal Icons -->
+        <div class="social-login-horizontal">
+            <p class="social-login-text">Sign up with</p>
+            <div class="social-icons-horizontal">
+                <a href="{% provider_login_url 'google' %}" class="social-icon-link" title="Sign up with Google" aria-label="Sign up with Google">
+                    <div class="social-icon google-icon">
+                        <img src="{% static 'images/google.png' %}" alt="Google" style="width: 24px; height: 24px;">
+                    </div>
+                </a>
+                <a href="{% provider_login_url 'facebook' %}" class="social-icon-link" title="Sign up with Facebook" aria-label="Sign up with Facebook">
+                    <div class="social-icon facebook-icon">
+                        <img src="{% static 'images/facebook.png' %}" alt="Facebook" style="width: 24px; height: 24px;">
+                    </div>
+                </a>
+                <a href="{% provider_login_url 'linkedin_oauth2' %}" class="social-icon-link" title="Sign up with LinkedIn" aria-label="Sign up with LinkedIn">
+                    <div class="social-icon linkedin-icon">
+                        <img src="{% static 'images/linkedin.png' %}" alt="LinkedIn" style="width: 24px; height: 24px;">
+                    </div>
+                </a>
+                <a href="{% provider_login_url 'twitter' %}" class="social-icon-link" title="Sign up with Twitter" aria-label="Sign up with Twitter">
+                    <div class="social-icon twitter-icon">
+                        <img src="{% static 'images/twitter.png' %}" alt="Twitter" style="width: 24px; height: 24px;">
+                    </div>
+                </a>
+            </div>
+        </div>
+
+        <div class="divider">
+            <span>Or create account with email</span>
+        </div>
+
+        <!-- Regular Signup Form -->
+        <form method="post" class="signup-form">
+            {% csrf_token %}
+
+            <div class="form-row">
+                <div class="form-group">
+                    <label for="{{ form.username.id_for_label }}">Username</label>
+                    {{ form.username }}
+                    {% if form.username.errors %}
+                        {% for error in form.username.errors %}
+                            <div style="color: #DC143C; font-size: 0.9em; margin-top: 5px;">{{ error }}</div>
+                        {% endfor %}
+                    {% endif %}
+                </div>
+
+                <div class="form-group">
+                    <label for="{{ form.email.id_for_label }}">Email</label>
+                    {{ form.email }}
+                    {% if form.email.errors %}
+                        {% for error in form.email.errors %}
+                            <div style="color: #DC143C; font-size: 0.9em; margin-top: 5px;">{{ error }}</div>
+                        {% endfor %}
+                    {% endif %}
+                </div>
+            </div>
+
+            <div class="form-row">
+                <div class="form-group">
+                    <label for="{{ form.phone_number.id_for_label }}">Phone Number</label>
+                    {{ form.phone_number }}
+                    {% if form.phone_number.errors %}
+                        {% for error in form.phone_number.errors %}
+                            <div style="color: #DC143C; font-size: 0.9em; margin-top: 5px;">{{ error }}</div>
+                        {% endfor %}
+                    {% endif %}
+                </div>
+
+                <div class="form-group">
+                    <label for="{{ form.address.id_for_label }}">Address</label>
+                    {{ form.address }}
+                    {% if form.address.errors %}
+                        {% for error in form.address.errors %}
+                            <div style="color: #DC143C; font-size: 0.9em; margin-top: 5px;">{{ error }}</div>
+                        {% endfor %}
+                    {% endif %}
+                </div>
+            </div>
+
+            <div class="form-row">
+                <div class="form-group">
+                    <label for="{{ form.password1.id_for_label }}">Password</label>
+                    <div class="password-group">
+                        {{ form.password1 }}
+                        <button type="button" class="password-toggle" data-target="{{ form.password1.id_for_label }}" title="Show/Hide password">
+                            <i class="fas fa-eye"></i>
+                        </button>
+                    </div>
+                    {% if form.password1.errors %}
+                        {% for error in form.password1.errors %}
+                            <div style="color: #DC143C; font-size: 0.9em; margin-top: 5px;">{{ error }}</div>
+                        {% endfor %}
+                    {% endif %}
+                </div>
+
+                <div class="form-group">
+                    <label for="{{ form.password2.id_for_label }}">Confirm Password</label>
+                    <div class="password-group">
+                        {{ form.password2 }}
+                        <button type="button" class="password-toggle" data-target="{{ form.password2.id_for_label }}" title="Show/Hide password">
+                            <i class="fas fa-eye"></i>
+                        </button>
+                    </div>
+                    {% if form.password2.errors %}
+                        {% for error in form.password2.errors %}
+                            <div style="color: #DC143C; font-size: 0.9em; margin-top: 5px;">{{ error }}</div>
+                        {% endfor %}
+                    {% endif %}
+                </div>
+            </div>
+
+            <button type="submit" class="signup-btn">
+                🚀 Create Account
+            </button>
+        </form>
+
+        <!-- Login Link -->
+        <div class="login-link">
+            <p>Already have an account?</p>
+            <a href="{% url 'account_login' %}">Sign in here</a>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Password toggle functionality
+    const toggles = document.querySelectorAll('.password-toggle');
+
+    toggles.forEach(toggle => {
+        toggle.addEventListener('click', function() {
+            const targetId = this.getAttribute('data-target');
+            const targetInput = document.getElementById(targetId);
+            const icon = this.querySelector('i');
+
+            if (targetInput.type === 'password') {
+                targetInput.type = 'text';
+                icon.classList.remove('fa-eye');
+                icon.classList.add('fa-eye-slash');
+            } else {
+                targetInput.type = 'password';
+                icon.classList.remove('fa-eye-slash');
+                icon.classList.add('fa-eye');
+            }
+        });
+    });
+
+    // Social login is now functional!
+});
+</script>
+{% endblock %}
