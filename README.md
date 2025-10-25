@@ -20,7 +20,7 @@
 
 2. **Install & Configure**
    ```bash
-   pip install -r requirements.txt
+   pip install django django-allauth django-humanize pillow
    python manage.py migrate
    python manage.py createsuperuser
    python manage.py collectstatic --noinput
