@@ -71,10 +71,13 @@ INSTALLED_APPS = [
     # Third-party apps
     'allauth',
     'allauth.account',
-    # 'allauth.socialaccount',
-    # 'allauth.socialaccount.providers.google',
-    # 'allauth.socialaccount.providers.twitter_oauth2',
-    # 'allauth.socialaccount.providers.linkedin_oauth2',
+    'allauth.socialaccount',
+    'allauth.socialaccount.providers.google',
+    'allauth.socialaccount.providers.facebook',
+    'allauth.socialaccount.providers.linkedin_oauth2',
+    'allauth.socialaccount.providers.twitter',
+    'allauth.socialaccount.providers.instagram',
+    'crispy_forms',
 
     # Local apps
     'accounts',
@@ -186,7 +189,8 @@ SITE_ID = 1
 
 # Account settings (updated to avoid deprecation warnings)
 ACCOUNT_SIGNUP_FIELDS = ['email*', 'username*', 'password1*', 'password2*']
-ACCOUNT_EMAIL_VERIFICATION = 'optional'
+ACCOUNT_ADAPTER = 'accounts.adapter.CustomAccountAdapter'
+ACCOUNT_EMAIL_VERIFICATION = 'none'  # Disable email verification for development
 ACCOUNT_LOGIN_METHODS = {'username', 'email'}
 ACCOUNT_EMAIL_CONFIRMATION_EXPIRE_DAYS = 3
 ACCOUNT_LOGIN_ON_EMAIL_CONFIRMATION = True
@@ -196,19 +200,76 @@ SOCIALACCOUNT_AUTO_SIGNUP = True
 SOCIALACCOUNT_EMAIL_REQUIRED = True
 SOCIALACCOUNT_EMAIL_VERIFICATION = False
 
+# Crispy forms
+CRISPY_TEMPLATE_PACK = 'bootstrap4'
+
 # Login/logout settings
 LOGIN_REDIRECT_URL = '/'
 LOGOUT_REDIRECT_URL = '/'
 
-# Social login settings
-SOCIAL_AUTH_GOOGLE_CLIENT_ID = 'your-google-client-id'
-SOCIAL_AUTH_GOOGLE_SECRET = 'your-google-client-secret'
-
-SOCIAL_AUTH_TWITTER_CLIENT_ID = 'your-twitter-client-id'
-SOCIAL_AUTH_TWITTER_SECRET = 'your-twitter-client-secret'
-
-SOCIAL_AUTH_LINKEDIN_CLIENT_ID = 'your-linkedin-client-id'
-SOCIAL_AUTH_LINKEDIN_SECRET = 'your-linkedin-client-secret'
+# Social account settings
+SOCIALACCOUNT_PROVIDERS = {
+    'google': {
+        'APP': {
+            'client_id': '',
+            'secret': '',
+            'key': ''
+        },
+        'SCOPE': [
+            'profile',
+            'email',
+        ],
+        'AUTH_PARAMS': {
+            'access_type': 'online',
+        }
+    },
+    'facebook': {
+        'APP': {
+            'client_id': '',
+            'secret': '',
+            'key': ''
+        },
+        'METHOD': 'oauth2',
+        'SCOPE': ['email', 'public_profile'],
+        'AUTH_PARAMS': {'auth_type': 'reauthenticate'},
+        'INIT_PARAMS': {'cookie': True},
+        'FIELDS': [
+            'id',
+            'first_name',
+            'last_name',
+            'middle_name',
+            'name',
+            'name_format',
+            'picture',
+            'short_name'
+        ],
+        'EXCHANGE_TOKEN': True,
+        'LOCALE_FUNC': 'path.to.callable',
+        'VERIFIED_EMAIL': False,
+        'VERSION': 'v13.0'
+    },
+    'linkedin_oauth2': {
+        'APP': {
+            'client_id': '',
+            'secret': '',
+            'key': ''
+        }
+    },
+    'twitter': {
+        'APP': {
+            'client_id': '',
+            'secret': '',
+            'key': ''
+        }
+    },
+    'instagram': {
+        'APP': {
+            'client_id': '',
+            'secret': '',
+            'key': ''
+        }
+    }
+}
 
 
 # Email Configuration

@@ -5,6 +5,7 @@ from django.contrib.auth.decorators import login_required
 from django.contrib.auth.forms import PasswordChangeForm
 from django import forms
 from .forms import CustomUserCreationForm, CustomAuthenticationForm
+from django.contrib.auth.models import AnonymousUser
 
 User = get_user_model()
 
@@ -74,3 +75,32 @@ def dashboard(request):
         password_form = PasswordChangeForm(request.user)
 
     return render(request, 'accounts/dashboard.html', {'form': user_form, 'password_form': password_form})
+
+@login_required
+def delete_account(request):
+    """View for users to delete their own account"""
+    if request.method == 'POST':
+        # Double confirmation check
+        confirmation = request.POST.get('confirm_deletion', '')
+        username = request.POST.get('confirm_username', '')
+
+        if confirmation == 'DELETE' and username == request.user.username:
+            # Delete user's properties first
+            properties_count = request.user.properties.all().count()
+            request.user.properties.all().delete()  # This will cascade delete related images
+
+            # Delete the user account
+            user_to_delete = request.user
+            username = user_to_delete.username
+            user_to_delete.delete()
+
+            # Log out the user (they're already deleted so this is just cleanup)
+            messages.success(request, f"Account '{username}' has been successfully deleted along with {properties_count} properties.")
+
+            # Redirect to home page since user is now anonymous
+            return redirect('home')
+
+        else:
+            messages.error(request, "Account deletion confirmation failed. Please type 'DELETE' and your username exactly.")
+
+    return render(request, 'accounts/delete_account.html', {})

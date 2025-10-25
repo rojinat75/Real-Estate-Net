@@ -113,6 +113,11 @@ class Property(models.Model):
     def __str__(self):
         return self.title
 
+    def get_absolute_url(self):
+        """Return the URL for this property's detail page"""
+        from django.urls import reverse
+        return reverse('properties:property_detail', kwargs={'pk': self.pk})
+
 class Image(models.Model):
     property = models.ForeignKey(Property, on_delete=models.CASCADE, related_name='images')
     image = models.ImageField(upload_to='property_images/')

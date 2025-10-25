@@ -92,20 +92,15 @@
                         {% for property in user.properties.all %}
                             <div class="listing-card">
                                 <div class="listing-image">
-                                    {% with approved_list=property.images.all %}
-                                    {% for image in approved_list %}
-                                        {% if image.status == 'approved' %}
-                                            <img src="{{ image.image.url }}" alt="{{ property.title }}">
-                                            {% break %}
-                                        {% endif %}
-                                    {% empty %}
-                                        {% if property.floor_plan_image %}
-                                            <img src="{{ property.floor_plan_image.url }}" alt="{{ property.title }} Floor Plan">
-                                        {% else %}
-                                            <div class="no-image-small">No Image</div>
-                                        {% endif %}
-                                    {% endfor %}
-                                    {% endwith %}
+                                    {% if property.images.exists %}
+                                        {% with approved_image=property.images.first %}
+                                            <img src="{{ approved_image.image.url }}" alt="{{ property.title }}">
+                                        {% endwith %}
+                                    {% elif property.floor_plan_image %}
+                                        <img src="{{ property.floor_plan_image.url }}" alt="{{ property.title }} Floor Plan">
+                                    {% else %}
+                                        <div class="no-image-small">No Image</div>
+                                    {% endif %}
                                     {% if property.is_premium %}
                                         <span class="premium-badge-small">Premium</span>
                                     {% endif %}
@@ -142,14 +137,17 @@
 
             <div class="account-actions-section">
                 <h2>Account Actions</h2>
-                <form id="logout-form" method="post" action="{% url 'account_logout' %}" style="display: none;">
-                  {% csrf_token %}
-                </form>
-
-            <a href="#" class="logout-btn" onclick="document.getElementById('logout-form').submit(); return false;">
-                <i class="fas fa-sign-out-alt"></i> Logout
-            </a>
-
+                <div class="actions-list">
+                    <a href="{% url 'accounts:delete_account' %}" class="danger-btn delete-account-btn">
+                        <i class="fas fa-trash-alt"></i> Delete My Account
+                    </a>
+                    <form id="logout-form" method="post" action="{% url 'account_logout' %}" style="display: none;">
+                      {% csrf_token %}
+                    </form>
+                    <a href="#" class="logout-btn" onclick="document.getElementById('logout-form').submit(); return false;">
+                        <i class="fas fa-sign-out-alt"></i> Logout
+                    </a>
+                </div>
             </div>
         </div>
     </div>
@@ -502,6 +500,29 @@
     display: flex;
     gap: 10px;
     flex-wrap: wrap;
+}
+
+.danger-btn {
+    display: inline-block;
+    background: #dc3545;
+    color: white;
+    padding: 10px 20px;
+    text-decoration: none;
+    border-radius: 5px;
+    font-weight: bold;
+    transition: background 0.3s ease;
+    border: 2px solid #dc3545;
+}
+
+.danger-btn:hover {
+    background: #c82333;
+    border-color: #c82333;
+    transform: translateY(-1px);
+    box-shadow: 0 4px 8px rgba(220, 53, 69, 0.3);
+}
+
+.danger-btn i {
+    margin-right: 8px;
 }
 
 .logout-btn {

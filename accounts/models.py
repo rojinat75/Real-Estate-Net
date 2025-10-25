@@ -9,6 +9,8 @@ class User(AbstractUser):
     phone_number = models.CharField(max_length=20, blank=True, null=True)
     address = models.CharField(max_length=255, blank=True, null=True)
     user_type = models.CharField(max_length=10, choices=USER_TYPE_CHOICES, default='buyer')
+    agree_terms = models.BooleanField(default=False)
+    terms_accepted_date = models.DateTimeField(null=True, blank=True)
 
     def __str__(self):
         return f"{self.username} ({self.user_type})"
