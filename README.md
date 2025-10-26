@@ -1,6 +1,6 @@
 # 🏠 Gorkha Real Estate
 
-A modern real estate platform built with Django for property listings, user management, and premium services in Nepal.
+A modern real estate platform built with Django for property listings, user management, and premium services.
 
 ## 🚀 Quick Start
 
@@ -12,7 +12,7 @@ A modern real estate platform built with Django for property listings, user mana
 
 1. **Clone the repository**
    ```bash
-   git clone https://github.com/your-username/real-estate-net.git
+   git clone git@github.com:rojinat75/Real-Estate-Net.git
    cd real-estate-net
    ```
 
@@ -103,4 +103,4 @@ DATABASE_URL=sqlite:///db.sqlite3
 
 
 
-**Made with ❤️ for the real estate community in Nepal**
+**Made with ❤️ for the global real estate community**
