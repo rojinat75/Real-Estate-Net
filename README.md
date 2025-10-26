@@ -1,112 +1,106 @@
-# 🏠 Real Estate Net
+# 🏠 Gorkha Real Estate
 
-*A modern, scalable real estate marketplace platform built with Django.*
+A modern real estate platform built with Django for property listings, user management, and premium services in Nepal.
 
 ## 🚀 Quick Start
 
-### Prerequisites
-- Python 3.11+
-- PostgreSQL 15+
-- Git
+### Requirements
+- Python 3.8+
+- Virtual environment (recommended)
 
-### Installation (3 Steps)
+### Installation
 
-1. **Clone & Setup**
+1. **Clone the repository**
    ```bash
+   git clone https://github.com/your-username/real-estate-net.git
    cd real-estate-net
-   python -m venv venv
-   source venv/bin/activate  # Windows: venv\Scripts\activate
    ```
 
-2. **Install & Configure**
+2. **Set up virtual environment**
    ```bash
-   pip install django django-allauth django-humanize pillow
-   python manage.py migrate
-   python manage.py createsuperuser
-   python manage.py collectstatic --noinput
+   python -m venv real_estate_env
+   # Windows:
+   real_estate_env\Scripts\activate
+   # macOS/Linux:
+   source real_estate_env/bin/activate
    ```
 
-3. **Run Server**
+3. **Install dependencies**
+   ```bash
+   pip install -r requirements.txt
+   ```
+
+4. **Configure the database**
+   ```bash
+   python manage.py migrate
+   ```
+
+5. **Create admin user** (optional for development)
+   ```bash
+   python manage.py createsuperuser
+   ```
+
+6. **Run the development server**
    ```bash
    python manage.py runserver
    ```
 
-Visit `http://localhost:8000` to access Real Estate Net.
+Visit `http://127.0.0.1:8000` to access the website!
 
----
+## ✨ Features
 
-## ✨ Key Features
+- **🏢 Property Management**: List and manage real estate properties
+- **👤 User Authentication**: Sign up, login, and user profiles
+- **🔍 Advanced Search**: Filter properties by location, price, type
+- **💎 Premium Services**: Subscription-based premium listings
+- **📊 Analytics Dashboard**: Track website performance
+- **📱 Responsive Design**: Mobile-friendly interface
+- **📰 Blog**: Property news and market updates
+- **📞 Contact System**: Inquire about properties
 
-- **🏢 Advanced Property Listings**: Upload photos, floor plans, virtual tours
-- **🔍 Smart Search Engine**: Real-time search with advanced filters
-- **🗺️ Interactive Maps**: Leaflet-powered property visualization
-- **👥 Multi-User System**: Support for brokers, investors, and buyers
-- **💎 Premium Features**: Subscription-based enhanced listings
-- **📊 Analytics Dashboard**: Comprehensive site management and metrics
+## 📁 Project Structure
 
----
+```
+├── accounts/         # User authentication and profiles
+├── properties/       # Property listings and management
+├── premium/          # Premium subscription features
+├── analytics/        # Website analytics and tracking
+├── contact/          # Contact forms and inquiries
+├── blog/            # Blog articles and posts
+├── legal/           # Legal pages and agreements
+├── static/          # CSS, JavaScript, and images
+├── templates/       # HTML templates
+└── real_estate/     # Django project settings
+```
 
 ## 🛠️ Tech Stack
 
-**Backend**: Django 5.2+, PostgreSQL, Celery, Redis
-**Frontend**: HTML5, CSS3, JavaScript ES6+, Leaflet Maps
-**Deployment**: Docker, AWS S3, Stripe/PayPal integration
+- **Backend**: Django 5.2.7
+- **Database**: SQLite (development) / PostgreSQL (production)
+- **Frontend**: HTML5, CSS3, JavaScript
+- **Authentication**: Django Allauth (social login support)
+- **Forms**: Django Crispy Forms
 
----
+## 📝 Environment Variables
 
-## 📋 Configuration
+Create a `.env` file in the project root with your configuration:
 
-Create `.env` file:
 ```env
-DATABASE_URL=postgresql://user:password@localhost:5432/real_estate_db
+DEBUG=True
 SECRET_KEY=your-secret-key-here
-STRIPE_PUBLISHABLE_KEY=pk_test_...
-STRIPE_SECRET_KEY=sk_test_...
+DATABASE_URL=sqlite:///db.sqlite3
 ```
 
----
+## 🤝 Contributing
 
-## 🌐 User Guide
+1. Fork the repository
+2. Create a feature branch
+3. Make your changes
+4. Test thoroughly
+5. Submit a pull request
 
-- **Admin Panel**: `/real-admin/` (Superusers only)
-- **User Dashboard**: Personalized property management
-- **Property Search**: Advanced filters and map view
-- **Premium Upgrade**: Subscription-based enhancements
+## 📄 License
 
----
 
-## 📁 Structure
-```
-├── accounts/    # User authentication
-├── properties/  # Property management
-├── premium/     # Subscriptions & payments
-├── analytics/   # Tracking & insights
-├── static/      # Assets (CSS, JS, images)
-└── templates/   # HTML templates
-```
 
----
-
-## 🚀 Production Deployment
-
-Use Docker Compose for production:
-```yaml
-version: '3.8'
-services:
-  web:
-    build: .
-    ports: ["8000:8000"]
-    environment: [DEBUG=False]
-```
-
----
-
-## ℹ️ Important Notes
-
-- **Private Project**: Internal documentation only
-- **Security**: Configure HTTPS in production
-- **Performance**: Redis caching enabled by default
-
----
-
-**Real Estate Net** © 2025. Internal development documentation.
+**Made with ❤️ for the real estate community in Nepal**

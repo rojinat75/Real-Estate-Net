@@ -194,7 +194,7 @@ urlpatterns = [
 if settings.ADMIN_ENABLED and not settings.ADMIN_RESTRICTED_ACCESS:
     urlpatterns.insert(0, path('admin/', admin.site.urls))
 
-# Serve media files during development
-if settings.DEBUG:
+# Serve media and static files during development and tunneling
+if settings.DEBUG or getattr(settings, 'SERVEO_TUNNEL_ACTIVE', False):
     urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
     urlpatterns += static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)

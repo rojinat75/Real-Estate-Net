@@ -220,6 +220,19 @@
     border-radius: 8px;
 }
 
+/* Premium Badge Styling */
+.premium-badge {
+    background: linear-gradient(135deg, var(--nepal-crimson), #ff6b6b);
+    color: white;
+    padding: 2px 8px 3px;
+    border-radius: 12px;
+    font-size: 0.8em;
+    font-weight: bold;
+    vertical-align: middle;
+    margin-left: 8px;
+    box-shadow: 0 2px 4px rgba(220, 20, 60, 0.3);
+}
+
 .property-content {
     padding: 20px;
 }
@@ -497,8 +510,8 @@
                     <p>Find the perfect property that matches your needs</p>
                 </div>
                 <div class="search-controls">
-                    <div class="search-input-group">
-                        <input type="text" name="q" placeholder="🔍 City, address, property type..." class="search-input-pro" required>
+                <div class="search-input-group">
+                    <input type="text" name="query" placeholder="🔍 City, address, property type..." class="search-input-pro" required>
                         <select name="property_type" class="property-select-pro">
                             <option value="">🏢 All Property Types</option>
                             <option value="office">🏛️ Office</option>
@@ -544,7 +557,7 @@
                         <div class="property-content">
                             <h3>{{ property.title }}{% if property.is_premium %} <span class="premium-badge">⭐ PREMIUM</span>{% endif %}</h3>
                             <p class="location">{{ property.city }}, {{ property.state }}</p>
-                            <p class="property-type">Type: {{ property.property_type|title }}</p>
+                            <p class="property-type">Type: {{ property.property_type.name|title }}</p>
                             <p class="price">NPR {{ property.price|intcomma }}</p>
                             <a href="{% url 'properties:property_detail' property.pk %}" class="view-details-btn">View Details</a>
                         </div>
@@ -561,8 +574,8 @@
                 {% endfor %}
             </div>
             {% if latest_properties %}
-                <div class="view-all-container">
-                    <a href="{% url 'properties:property_list' %}" class="view-all-btn">View All Properties</a>
+                <div class="view-all-container" style="text-align: center; margin-top: 40px;">
+                    <a href="{% url 'properties:property_list' %}" class="view-all-btn" style="background: var(--nepal-blue); color: white; padding: 12px 24px; border-radius: 8px; text-decoration: none; font-weight: bold; display: inline-block; transition: background 0.3s;">View All Properties</a>
                 </div>
             {% endif %}
         </div>
@@ -578,7 +591,7 @@
                     <a href="{% url 'properties:property_create' %}" class="cta-btn primary">List Your Property</a>
                     <a href="{% url 'properties:property_list' %}?view=map" class="cta-btn secondary">View Map</a>
                 {% else %}
-                    <a href="{% url 'account_signup' %}" class="cta-btn primary">Join Now Free</a>
+                    <a href="{% url 'accounts:register' %}" class="cta-btn primary">Join Now Free</a>
                     <a href="{% url 'account_login' %}" class="cta-btn secondary">Sign In</a>
                 {% endif %}
             </div>

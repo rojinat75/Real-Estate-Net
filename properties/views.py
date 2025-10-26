@@ -1,12 +1,12 @@
 from django.shortcuts import render, get_object_or_404
 from django.db.models import Q
-from .models import Property, PropertyType, Amenity, Image, SavedSearch
+from .models import Property, SavedSearch
 from django.contrib.auth.decorators import login_required, user_passes_test
-from django.forms import modelformset_factory
 from .forms import PropertySearchForm, PropertyForm
 from django.contrib import messages
 from django.shortcuts import redirect
 import random
+
 
 def broker_required(view_func):
     """
@@ -14,7 +14,8 @@ def broker_required(view_func):
     """
     def check_user(user):
         return user.is_authenticated and user.user_type == 'broker'
-    return user_passes_test(check_user, login_url='/accounts/login/', redirect_field_name='next')(view_func)
+    return user_passes_test(check_user, login_url='accounts:login', redirect_field_name='next')(view_func)
+
 
 def home(request):
     if request.user.is_authenticated:
@@ -76,11 +77,19 @@ def property_list(request):
     # Add related images to properties for template use
     properties = properties.prefetch_related('images')
 
-    # Prepare data for map markers
+    # Prepare data for map markers using actual property coordinates
     properties_data = []
     for prop in properties:
-        lat = 27.7172 + random.uniform(-0.1, 0.1)  # Approximate Kathmandu coordinates
-        lng = 85.3240 + random.uniform(-0.1, 0.1)
+        # Use property's location coordinates if available, otherwise fallback to Kathmandu
+        lat = getattr(prop.location, 'latitude', None) or 27.7172
+        lng = getattr(prop.location, 'longitude', None) or 85.3240
+
+        # Add slight randomization if multiple properties have same coordinates
+        same_coords = [p for p in properties_data if p['lat'] == lat and p['lng'] == lng]
+        if same_coords:
+            lat += random.uniform(-0.01, 0.01)
+            lng += random.uniform(-0.01, 0.01)
+
         properties_data.append({
             'title': prop.title,
             'lat': lat,
@@ -173,12 +182,17 @@ def property_create(request):
     if request.method == 'POST':
         form = PropertyForm(request.POST, request.FILES)
         if form.is_valid():
-            property = form.save(commit=False)
-            property.user = request.user
-            property.save()
+            property_obj = form.save(commit=False)
+            property_obj.user = request.user
+            property_obj.save()
             form.save_m2m() # Save ManyToMany relations
             messages.success(request, "Property created successfully.")
-            return redirect('properties:property_detail', pk=property.pk)
+            return redirect('properties:property_detail', pk=property_obj.pk)
+        else:
+            # Add form errors to messages for debugging
+            for field, errors in form.errors.items():
+                for error in errors:
+                    messages.error(request, f"{field}: {error}")
     else:
         form = PropertyForm()
     return render(request, 'properties/property_form.html', {'form': form, 'action': 'Create'})
@@ -192,8 +206,14 @@ def property_update(request, pk):
             form.save()
             messages.success(request, "Property updated successfully.")
             return redirect('properties:property_detail', pk=property.pk)
+        else:
+            # Add form errors to messages for debugging
+            for field, errors in form.errors.items():
+                for error in errors:
+                    messages.error(request, f"{field}: {error}")
     else:
         form = PropertyForm(instance=property)
+
     return render(request, 'properties/property_form.html', {'form': form, 'action': 'Update'})
 
 @login_required

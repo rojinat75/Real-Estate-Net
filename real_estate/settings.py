@@ -20,12 +20,28 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # See https://docs.djangoproject.com/en/5.2/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = 'django-insecure-en6xc^isgg1gl(f*ptl%#hao8ewsj$kbpeh%s!*7+%fo2%q@tx'
+SECRET_KEY = (
+    'InpiXpyYxMKFT2LNrvd6Y6lbgEagBTIt8cVg92QUylSMw-vRY7xsbjug'
+    'FMDqoWnmwGw'
+)
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = ['127.0.0.1', 'localhost', '192.168.1.0/24', '10.0.0.0/8']
+# Serveo tunnel detection
+SERVEO_TUNNEL_ACTIVE = False  # Set to True when using Serveo tunnel
+
+ALLOWED_HOSTS = [
+    '127.0.0.1',
+    'localhost',
+    '192.168.1.0/24',  # Local network
+    '10.0.0.0/8',      # Private network
+    #'9ac53b685dca367d97b560f86aceab3f.serveo.net.serveo.net',  # Serveo tunnel host for testing (uncomment when needed)
+]
+
+# Add Serveo host when tunnel is active
+if SERVEO_TUNNEL_ACTIVE:
+    ALLOWED_HOSTS.append('9ac53b685dca367d97b560f86aceab3f.serveo.net.serveo.net')
 
 # Admin Security Settings
 ADMIN_ENABLED = True
@@ -45,16 +61,24 @@ SECURE_HSTS_SECONDS = 31536000 if not DEBUG else 0
 SECURE_HSTS_INCLUDE_SUBDOMAINS = True
 SECURE_HSTS_PRELOAD = True
 
-# Session Security
-SESSION_COOKIE_SECURE = not DEBUG
+# Session Security - Adjust for Serveo tunneling
+# Only require secure cookies when using tunnel (not when DEBUG=True)
+SESSION_COOKIE_SECURE = SERVEO_TUNNEL_ACTIVE
 SESSION_COOKIE_HTTPONLY = True
-SESSION_COOKIE_SAMESITE = 'Strict'
+SESSION_COOKIE_SAMESITE = 'Lax' if SERVEO_TUNNEL_ACTIVE else 'Strict'  # More permissive for tunnel
 SESSION_EXPIRE_AT_BROWSER_CLOSE = True
 
-# CSRF Protection
-CSRF_COOKIE_SECURE = not DEBUG
+# CSRF Protection - Adjust for Serveo tunneling
+# Only require secure cookies when using tunnel (not when DEBUG=True)
+CSRF_COOKIE_SECURE = SERVEO_TUNNEL_ACTIVE
 CSRF_COOKIE_HTTPONLY = True
-CSRF_COOKIE_SAMESITE = 'Strict'
+CSRF_COOKIE_SAMESITE = 'Lax' if SERVEO_TUNNEL_ACTIVE else 'Strict'  # More permissive for tunnel
+
+# CSRF Trusted Origins for Serveo tunneling
+CSRF_TRUSTED_ORIGINS = [
+    'https://9ac53b685dca367d97b560f86aceab3f.serveo.net',  # Specific tunnel
+    'https://*.serveo.net',  # Allow any Serveo subdomain
+] if SERVEO_TUNNEL_ACTIVE else []
 
 
 # Application definition
@@ -208,66 +232,38 @@ LOGIN_REDIRECT_URL = '/'
 LOGOUT_REDIRECT_URL = '/'
 
 # Social account settings
+# NOTE: Configure these with actual credentials for social login
+# For development, social login is disabled until credentials are provided
 SOCIALACCOUNT_PROVIDERS = {
     'google': {
         'APP': {
-            'client_id': '',
-            'secret': '',
-            'key': ''
+            'client_id': 'your-google-client-id',
+            'secret': 'your-google-secret',
         },
-        'SCOPE': [
-            'profile',
-            'email',
-        ],
-        'AUTH_PARAMS': {
-            'access_type': 'online',
-        }
     },
     'facebook': {
         'APP': {
-            'client_id': '',
-            'secret': '',
-            'key': ''
+            'client_id': 'your-facebook-client-id',
+            'secret': 'your-facebook-secret',
         },
-        'METHOD': 'oauth2',
-        'SCOPE': ['email', 'public_profile'],
-        'AUTH_PARAMS': {'auth_type': 'reauthenticate'},
-        'INIT_PARAMS': {'cookie': True},
-        'FIELDS': [
-            'id',
-            'first_name',
-            'last_name',
-            'middle_name',
-            'name',
-            'name_format',
-            'picture',
-            'short_name'
-        ],
-        'EXCHANGE_TOKEN': True,
-        'LOCALE_FUNC': 'path.to.callable',
-        'VERIFIED_EMAIL': False,
-        'VERSION': 'v13.0'
     },
     'linkedin_oauth2': {
         'APP': {
-            'client_id': '',
-            'secret': '',
-            'key': ''
-        }
+            'client_id': 'your-linkedin-client-id',
+            'secret': 'your-linkedin-secret',
+        },
     },
     'twitter': {
         'APP': {
-            'client_id': '',
-            'secret': '',
-            'key': ''
-        }
+            'client_id': 'your-twitter-client-id',
+            'secret': 'your-twitter-secret',
+        },
     },
     'instagram': {
         'APP': {
-            'client_id': '',
-            'secret': '',
-            'key': ''
-        }
+            'client_id': 'your-instagram-client-id',
+            'secret': 'your-instagram-secret',
+        },
     }
 }
 
