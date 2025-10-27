@@ -89,6 +89,8 @@ Create a `.env` file in the project root with your configuration:
 DEBUG=True
 SECRET_KEY=your-secret-key-here
 DATABASE_URL=sqlite:///db.sqlite3
+
+⚠️Note⚠️: db.sqlite3 is temporarily committed for team development and testing.
 ```
 
 ## 🤝 Contributing
